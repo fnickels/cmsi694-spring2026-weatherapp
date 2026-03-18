@@ -17,7 +17,7 @@ A visitor arrives at the website, types the name of a city or town into a search
 
 **Acceptance Scenarios**:
 
-1. **Given** the home page is loaded, **When** a user types a city name (e.g., "Chicago") and submits the search, **Then** the page displays current temperature, weather condition, humidity, wind speed/direction, and "feels like" temperature for Chicago.
+1. **Given** the home page is loaded, **When** a user types a city name (e.g., "Chicago") and submits the search, **Then** the page displays current temperature, weather condition, humidity, wind speed/direction, and "feels-like" temperature for Chicago.
 2. **Given** weather data has been retrieved, **When** the user views the results, **Then** the location name, and the time of the weather reading are clearly displayed.
 3. **Given** the user submits an unrecognized location name, **When** the search executes, **Then** a clear, friendly error message is shown explaining that the location was not found and prompting the user to try again.
 
@@ -85,7 +85,7 @@ A returning visitor or a user who has already searched for a location during the
 ### Functional Requirements
 
 - **FR-001**: Users MUST be able to enter a location name (city, town, or postal/zip code) into a clearly labeled search field and submit it to retrieve current weather.
-- **FR-002**: System MUST display the following weather facts for any successfully retrieved location: current temperature, "feels like" temperature, weather condition label (e.g., "Partly Cloudy"), humidity percentage, wind speed and direction, and visibility.
+- **FR-002**: System MUST display the following weather facts for any successfully retrieved location: current temperature, "feels-like" temperature, weather condition label (e.g., "Partly Cloudy"), humidity percentage, wind speed and direction (displayed as cardinal or intercardinal labels: N, NE, E, SE, S, SW, W, NW), and visibility.
 - **FR-003**: System MUST display a visual weather condition indicator (icon or illustration) that represents the current condition (e.g., sun, clouds, rain).
 - **FR-004**: System MUST display the resolved location name and the date and time of the weather observation for context.
 - **FR-005**: System MUST provide a "Use My Location" button that triggers browser geolocation to auto-populate weather for the user's current position.
@@ -116,7 +116,7 @@ A returning visitor or a user who has already searched for a location during the
 - **SC-003**: 95% of searches for valid, real-world locations return weather data without error.
 - **SC-004**: Users can switch between imperial and metric units with all displayed values updating in under 1 second with no additional network request required.
 - **SC-005**: The weather condition icon or illustration accurately reflects the reported condition label for 100% of conditions the system supports.
-- **SC-006**: At least 90% of first-time visitors can locate the search field, enter a city, and successfully view weather results without needing any instructions or help text.
+- **SC-006**: The search field has a clearly visible label ("Enter location or city name") and is positioned prominently (above the fold, high visual hierarchy) so it is the first interactive element that draws attention on page load.
 - **SC-007**: The geolocation flow (request permission → detect location → show weather) completes within 8 seconds on a standard broadband connection.
 - **SC-008**: All interactive elements are keyboard navigable and meet WCAG 2.1 AA color contrast requirements (minimum 4.5:1 ratio for normal text).
 
@@ -128,6 +128,7 @@ A returning visitor or a user who has already searched for a location during the
 - Q: What frontend technology stack will be used? → A: React (Vite) + Tailwind CSS
 - Q: What accessibility standard must the site meet? → A: WCAG 2.1 AA
 - Q: What visual aesthetic direction should the site follow? → A: Dark glassmorphism / deep sky theme — dark gradient background (sky blues/navy), frosted-glass weather cards, white text
+- Q: How should wind direction be displayed to the user? → A: Cardinal and intercardinal compass labels (N, NE, E, SE, S, SW, W, NW) derived from meteorological bearing degrees (0ɧ0 = N, 90ɧ0 = E, 180ɧ0 = S, 270ɧ0 = W)
 - Q: What is the deployment target? → A: Local / dev only — run locally with `npm run dev`; no external hosting required
 
 ## Assumptions

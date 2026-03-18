@@ -43,7 +43,7 @@ This project will be built incrementally. Each user story is independently testa
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
 - [ ] T012 [P] Create `src/utils/wmoConditions.js` with all 27 WMO code → label/icon mappings (see research.md §3)
-- [ ] T013 [P] Create `src/utils/unitConversions.js` with functions: `celsiusToFahrenheit()`, `fahrenheitToCelsius()`, `kmhToMph()`, `mphToKmh()`, `metresToMiles()`, `metresToKilometers()`, `getWindDirectionLabel()`
+- [ ] T013 [P] Create `src/utils/unitConversions.js` with functions: `celsiusToFahrenheit()`, `fahrenheitToCelsius()`, `kmhToMph()`, `mphToKmh()`, `metresToMiles()`, `metresToKilometers()`, `getWindDirectionLabel(degrees)` (returns one of: N, NE, E, SE, S, SW, W, NW based on 0-360ɧ0 bearing per data-model.md)
 - [ ] T014 [P] Create unit tests `tests/unit/wmoConditions.test.js` covering all 27 codes (WRITE TESTS FIRST, expect to fail)
 - [ ] T015 [P] Create unit tests `tests/unit/unitConversions.test.js` covering all conversion functions with edge cases (WRITE TESTS FIRST, expect to fail)
 - [ ] T016 Create `src/index.css` with dark glassmorphism base styles: dark gradient background (navy/sky-blue), CSS variables for colors
@@ -68,8 +68,8 @@ This project will be built incrementally. Each user story is independently testa
 - [ ] T022 [P] Create `src/components/LoadingSpinner.jsx` component with animated spinner and `role="status" aria-live="polite"`
 - [ ] T023 [P] Create `src/components/ErrorMessage.jsx` component with user-friendly error text and optional dismiss callback button
 - [ ] T024 [P] Create `src/components/SearchBar.jsx` component: text input + submit button + "Use My Location" button; validates non-empty before submit; exposes `onSearch(query)`, `onUseMyLocation()`, `isLoading` props
-- [ ] T025 [P] Create `src/components/WeatherCard.jsx` component: displays condition icon (from Meteocons), temperature, feels-like temp, weather condition label, location name, observation time (glassmorphism styling)
-- [ ] T026 [P] Create `src/components/WeatherStats.jsx` component: displays humidity, wind speed + direction, visibility in a horizontal row (glassmorphism styling)
+- [ ] T025 [P] Create `src/components/WeatherCard.jsx` component: displays condition icon (from Meteocons), temperature, feels-like temp, weather condition label, location name, observation time (glassmorphism styling); does NOT display wind direction (handled by WeatherStats)
+- [ ] T026 [P] Create `src/components/WeatherStats.jsx` component: displays humidity, wind speed + direction (as cardinal labels N/NE/E/SE/S/SW/W/NW), visibility in a horizontal row (glassmorphism styling)
 - [ ] T027 [P] Create `src/components/LocationPicker.jsx` component: renders list of disambiguated locations; `onSelect(location)` callback on click; keyboard navigable (arrow keys, Enter, Tab)
 - [ ] T028 Create `src/App.jsx` root component wiring: `useWeather` hook, `useRecentSearches` hook, render SearchBar → LoadingSpinner | ErrorMessage | (WeatherCard + WeatherStats) | LocationPicker
 - [ ] T029 [P] Update `src/components/SearchBar.jsx` to validate empty input (do nothing if empty, show tooltip or brief message)
@@ -130,7 +130,7 @@ This project will be built incrementally. Each user story is independently testa
 - [ ] T046 Update `src/hooks/useWeather.js`: implement `toggleUnits()` method that re-fetches weather with opposite temperature_unit/wind_speed_unit params; convert visibility server-side response
 - [ ] T047 Update `src/hooks/useRecentSearches.js` to also write/read `sessionStorage` key `"weatherapp.unitPreference"` with value `"imperial"` or `"metric"` (default: `"imperial"`)
 - [ ] T048 Update `src/App.jsx`: manage `unitPreference` state, pass to `useWeather` hook, render `UnitToggle` in header, call `toggleUnits()` on unit toggle click
-- [ ] T049 Update `src/components/WeatherCard.jsx` and `WeatherStats.jsx`: accept `unit` prop and format display strings with correct units (e.g., pass `"45°F"` or `"7°C"` as display string, not raw values)
+- [ ] T049 Update `src/components/WeatherCard.jsx` and `WeatherStats.jsx`: accept `unit` prop and format display strings with correct units (e.g., pass `"45°F"` or `"7°C"` for temperature, wind speed as `"12 mph"` or `"19 km/h"`, wind direction as cardinal labels remain unit-agnostic)
 - [ ] T050 Update `src/services/weather.js`: accept `unit` parameter and pass as `temperature_unit` and `wind_speed_unit` query params to Open-Meteo API
 
 ### Testing for User Story 3
@@ -199,6 +199,8 @@ This project will be built incrementally. Each user story is independently testa
 - [ ] T081 Cross-browser test: verify app works on Chrome, Firefox, Safari, Edge (latest versions)
 - [ ] T082 Final code review: check for console errors/warnings, unused imports, code style consistency
 - [ ] T083 Validate with quickstart.md: fresh clone, `npm install`, `npm run dev`, test all core flows (search, geolocation, unit toggle, recent searches)
+- [ ] T084 Create integration test `tests/integration/LocationSearch.test.jsx`: query 20 real valid locations via Open-Meteo Geocoding API (e.g., "New York", "London", "Tokyo") to verify SC-003 (95% success rate achieved with real data)
+- [ ] T085 Create performance test `tests/integration/Geolocation.perf.test.jsx`: mock geolocation with mocked weather API and measure time from "Use My Location" click to weather display; verify completes within 8 seconds per SC-007
 
 **Checkpoint**: Feature complete, tested, documented, and ready for production.
 
