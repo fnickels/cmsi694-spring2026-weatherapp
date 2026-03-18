@@ -128,7 +128,7 @@ A returning visitor or a user who has already searched for a location during the
 - Q: What frontend technology stack will be used? → A: React (Vite) + Tailwind CSS
 - Q: What accessibility standard must the site meet? → A: WCAG 2.1 AA
 - Q: What visual aesthetic direction should the site follow? → A: Dark glassmorphism / deep sky theme — dark gradient background (sky blues/navy), frosted-glass weather cards, white text
-- Q: How should wind direction be displayed to the user? → A: Cardinal and intercardinal compass labels (N, NE, E, SE, S, SW, W, NW) derived from meteorological bearing degrees (0ɧ0 = N, 90ɧ0 = E, 180ɧ0 = S, 270ɧ0 = W)
+- Q: How should wind direction be displayed to the user? → A: Cardinal and intercardinal compass labels (N, NE, E, SE, S, SW, W, NW) derived from meteorological bearing degrees (0° = N, 90° = E, 180° = S, 270° = W)
 - Q: What is the deployment target? → A: Local / dev only — run locally with `npm run dev`; no external hosting required
 
 ## Assumptions

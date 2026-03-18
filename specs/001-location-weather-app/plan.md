@@ -31,7 +31,7 @@ A fully static single-page React application that lets users type a city name (o
 | IV. Testable Core Flows | ✅ PASS | Vitest + Testing Library; happy-path (search returns weather) + failure-path (API error) tests required |
 | V. Operability and Simplicity | ✅ PASS | `npm install && npm run dev` is the complete setup; quickstart.md documents it |
 | Technical Baseline — frontend interface | ✅ PASS | React SPA with full interactive UI |
-| Technical Baseline — backend service endpoint | ⚠️ EXCEPTION (justified) | See Complexity Tracking |
+| Technical Baseline — backend service endpoint | ✅ PASS | Frontend-only model allowed for keyless, CORS-enabled public API; rationale documented in Complexity Tracking |
 | Technical Baseline — config in env vars / excluded from source control | ✅ PASS (trivially) | No secrets exist; no .env file needed |
 | Technical Baseline — repeatable local setup in README | ✅ PASS | quickstart.md + README update required |
 
@@ -103,7 +103,7 @@ package.json
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|--------------------------------------|
-| No owned backend server (violates "backend service endpoint" in Technical Baseline) | Open-Meteo is a keyless, CORS-enabled public API — no backend proxy is needed to secure it. Adding a proxy server with no credentials to hide provides zero security benefit and introduces Node.js server complexity, a second process to run, and additional failure points for a course demo. | A backend proxy would proxy a public, keyless API over localhost — this adds operational complexity with no security, reliability, or functional gain. |
+| Frontend-only integration for keyless public API (documented allowance) | Open-Meteo is a keyless, CORS-enabled public API, so a backend proxy provides no additional security value for this scope. | A backend proxy would add process and maintenance complexity without improving security, reliability, or functional behavior. |
 
 ## Post-Design Constitution Check
 
@@ -117,8 +117,8 @@ Re-checked after Phase 1 artifacts (`research.md`, `data-model.md`, `contracts/`
 | IV. Testable Core Flows | ✅ PASS | Happy-path and failure-path test strategy documented; traceable to tasks |
 | V. Operability and Simplicity | ✅ PASS | Local setup and build/test commands documented; no complex infrastructure required |
 | Technical Baseline — frontend interface | ✅ PASS | React SPA with full interactive UI and responsive design |
-| Technical Baseline — backend service endpoint | ⚠️ EXCEPTION (justified) | Keyless external API negates need for backend; exception documented above |
+| Technical Baseline — backend service endpoint | ✅ PASS | Frontend-only model is explicitly permitted for this keyless API integration |
 | Technical Baseline — config in env vars | ✅ PASS | No secrets to store; no .env file required |
 | Technical Baseline — repeatable local setup | ✅ PASS | Quickstart.md + README provide complete setup path |
 
-**Conclusion**: Plan passes all constitutional gates with one justified exception. Ready to proceed to task generation.
+**Conclusion**: Plan passes all constitutional gates. Ready to proceed to task generation.

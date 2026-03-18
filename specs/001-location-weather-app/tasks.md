@@ -43,7 +43,7 @@ This project will be built incrementally. Each user story is independently testa
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
 - [ ] T012 [P] Create `src/utils/wmoConditions.js` with all 27 WMO code → label/icon mappings (see research.md §3)
-- [ ] T013 [P] Create `src/utils/unitConversions.js` with functions: `celsiusToFahrenheit()`, `fahrenheitToCelsius()`, `kmhToMph()`, `mphToKmh()`, `metresToMiles()`, `metresToKilometers()`, `getWindDirectionLabel(degrees)` (returns one of: N, NE, E, SE, S, SW, W, NW based on 0-360ɧ0 bearing per data-model.md)
+- [ ] T013 [P] Create `src/utils/unitConversions.js` with functions: `celsiusToFahrenheit()`, `fahrenheitToCelsius()`, `kmhToMph()`, `mphToKmh()`, `metresToMiles()`, `metresToKilometers()`, `getWindDirectionLabel(degrees)` (returns one of: N, NE, E, SE, S, SW, W, NW based on 0-360° bearing per data-model.md)
 - [ ] T014 [P] Create unit tests `tests/unit/wmoConditions.test.js` covering all 27 codes (WRITE TESTS FIRST, expect to fail)
 - [ ] T015 [P] Create unit tests `tests/unit/unitConversions.test.js` covering all conversion functions with edge cases (WRITE TESTS FIRST, expect to fail)
 - [ ] T016 Create `src/index.css` with dark glassmorphism base styles: dark gradient background (navy/sky-blue), CSS variables for colors
@@ -76,8 +76,8 @@ This project will be built incrementally. Each user story is independently testa
 
 ### Testing for User Story 1 (TDD — write tests FIRST)
 
-- [ ] T030 [P] Create `tests/unit/wmoConditions.test.js`: verify all 27 WMO codes return valid label + icon (IMPLEMENTED, now PASS the tests)
-- [ ] T031 [P] Create `tests/unit/unitConversions.test.js`: verify all conversion functions with known values (IMPLEMENTED, now PASS the tests)
+- [ ] T030 [P] Run test suite and update `src/utils/wmoConditions.js` implementation until T014 assertions pass
+- [ ] T031 [P] Run test suite and update `src/utils/unitConversions.js` implementation until T015 assertions pass
 - [ ] T032 Create integration test `tests/integration/SearchBar.test.jsx`: user types "Chicago", submits, mocked geocoding returns 1 result, mocked weather returns data, `WeatherCard` renders temperature and condition
 - [ ] T033 Create integration test `tests/integration/App.test.jsx` (failure path): user searches "InvalidXYZ", mocked geocoding returns 0 results, `ErrorMessage` is rendered with "location not found" text
 - [ ] T034 Create integration test `tests/integration/App.test.jsx` (API failure path): mocked geocoding API throws error (HTTP 503), `ErrorMessage` is rendered with an error message and user can try again
@@ -127,11 +127,11 @@ This project will be built incrementally. Each user story is independently testa
 ### Implementation for User Story 3
 
 - [ ] T045 [P] Create `src/components/UnitToggle.jsx` component: toggle between "°F" and "°C"; `unit` prop and `onToggle()` callback
-- [ ] T046 Update `src/hooks/useWeather.js`: implement `toggleUnits()` method that re-fetches weather with opposite temperature_unit/wind_speed_unit params; convert visibility server-side response
+- [ ] T046 Update `src/hooks/useWeather.js`: implement `toggleUnits()` method that updates `unitPreference` and recomputes display values locally from normalized metric state (no network request on toggle)
 - [ ] T047 Update `src/hooks/useRecentSearches.js` to also write/read `sessionStorage` key `"weatherapp.unitPreference"` with value `"imperial"` or `"metric"` (default: `"imperial"`)
 - [ ] T048 Update `src/App.jsx`: manage `unitPreference` state, pass to `useWeather` hook, render `UnitToggle` in header, call `toggleUnits()` on unit toggle click
 - [ ] T049 Update `src/components/WeatherCard.jsx` and `WeatherStats.jsx`: accept `unit` prop and format display strings with correct units (e.g., pass `"45°F"` or `"7°C"` for temperature, wind speed as `"12 mph"` or `"19 km/h"`, wind direction as cardinal labels remain unit-agnostic)
-- [ ] T050 Update `src/services/weather.js`: accept `unit` parameter and pass as `temperature_unit` and `wind_speed_unit` query params to Open-Meteo API
+- [ ] T050 Update `src/services/weather.js`: fetch weather in canonical metric units and normalize API response for client-side display conversion (unit toggle must not trigger additional network requests)
 
 ### Testing for User Story 3
 
@@ -193,7 +193,7 @@ This project will be built incrementally. Each user story is independently testa
 - [ ] T075 Test geolocation behavior on mobile device (iOS/Android) — verify permission flow works
 - [ ] T076 Update `README.md` in repository root: add "Installation", "Running Locally", "Testing", "Building" sections with commands from quickstart.md
 - [ ] T077 Verify `npm run build` produces valid `dist/` output with no errors
-- [ ] T078 Create `.gitignore` entries for `dist/`, `.vite/`, `node_modules/`, `.env*`
+- [ ] T078 Verify `.gitignore` includes `dist/`, `.vite/`, `node_modules/`, and `.env*`; update only if any entry is missing
 - [ ] T079 Run full test suite: `npm test` passes all unit + integration tests
 - [ ] T080 Performance check: verify 5s target for weather display on broadband (use Chrome DevTools Network throttling)
 - [ ] T081 Cross-browser test: verify app works on Chrome, Firefox, Safari, Edge (latest versions)
@@ -201,6 +201,7 @@ This project will be built incrementally. Each user story is independently testa
 - [ ] T083 Validate with quickstart.md: fresh clone, `npm install`, `npm run dev`, test all core flows (search, geolocation, unit toggle, recent searches)
 - [ ] T084 Create integration test `tests/integration/LocationSearch.test.jsx`: query 20 real valid locations via Open-Meteo Geocoding API (e.g., "New York", "London", "Tokyo") to verify SC-003 (95% success rate achieved with real data)
 - [ ] T085 Create performance test `tests/integration/Geolocation.perf.test.jsx`: mock geolocation with mocked weather API and measure time from "Use My Location" click to weather display; verify completes within 8 seconds per SC-007
+- [ ] T086 Add SC-006 UX validation: confirm search field label text is exactly "Enter location or city name", appears above the fold at 320px/768px/1920px, and is visually dominant as the first actionable control on initial load (capture screenshot evidence)
 
 **Checkpoint**: Feature complete, tested, documented, and ready for production.
 
