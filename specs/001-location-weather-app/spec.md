@@ -106,7 +106,7 @@ A returning visitor or a user who has already searched for a location during the
 
 - **Location**: Represents a geographic place — includes a display name, a unique identifier (used internally to fetch weather), and optional disambiguation context (e.g., region/country).
 - **CurrentWeather**: A snapshot of weather conditions at a point in time for a specific Location — includes temperature, feels-like temperature, humidity, wind speed, wind direction, weather condition label, visibility, and observation timestamp.
-- **UnitPreference**: A session-scoped user setting that determines whether weather data is shown in imperial or metric units. Defaults to a locale-appropriate value.
+- **UnitPreference**: A session-scoped user setting that determines whether weather data is shown in imperial or metric units. Defaults to imperial for this project.
 - **RecentSearch**: A session-stored record of a Location the user has previously searched; limited to the 5 most recent entries.
 
 ## Success Criteria *(mandatory)*

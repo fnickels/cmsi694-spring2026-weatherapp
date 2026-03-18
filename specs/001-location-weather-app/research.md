@@ -61,12 +61,11 @@ GET https://api.open-meteo.com/v1/forecast
            wind_speed_10m,wind_direction_10m,visibility,weather_code
   &temperature_unit={fahrenheit|celsius}    ← controlled by UnitPreference
   &wind_speed_unit={mph|kmh}                ← controlled by UnitPreference
-  &visibility_unit={miles|km}              ← controlled by UnitPreference (note: API param name differs)
   &timezone=auto
   &forecast_days=1
 ```
 
-> Note: `visibility` is returned in metres by default; use `&wind_speed_unit=mph` + `&temperature_unit=fahrenheit` for imperial. For visibility the API returns metres regardless of unit request — client-side conversion is needed to convert to miles or km (see unitConversions.js).
+> Note: `visibility` is returned in metres and should be converted client-side for display units. Use `&wind_speed_unit=mph` + `&temperature_unit=fahrenheit` only for wind/temperature API units.
 
 ### Response shape
 
@@ -195,14 +194,17 @@ GET https://api.open-meteo.com/v1/forecast
 
 ## 7. Geolocation Integration
 
-**Decision**: Use `navigator.geolocation.getCurrentPosition()` directly in `useGeolocation.js` hook. Pass obtained `{ latitude, longitude }` directly to the weather API (skipping geocoding).  
-**Rationale**: When coordinates are already known, the geocoding step adds latency with no benefit. Display name for auto-detected location is obtained by reverse-naming: pass coords to geocoding API with no `name` parameter is not supported — instead, use Open-Meteo's geocoding API is forward-only. Therefore, display name for geolocation results will be constructed from the nearest city lookup or the response's `name` field from a reverse-geocode call to a secondary endpoint.
+**Decision**: Use `navigator.geolocation.getCurrentPosition()` directly in `useGeolocation.js`, then call weather API with coordinates (skip geocoding). Display name behavior is deterministic: use a human-readable timezone-derived label when available, otherwise fall back to `"Your Location"`.  
+**Rationale**: Coordinates are already available, so geocoding adds avoidable latency. Open-Meteo geocoding is forward-only (name to coords), so it is not a reliable reverse-naming dependency for this flow.
 
-**Revised Decision**: For geolocation, skip naming and display "Your Location" as the display name initially, then asynchronously attempt to resolve a name by calling the weather data's `timezone` field (e.g., "America/Chicago") to derive a friendly city name — or use the browser's `Intl` API. This avoids a required second API dependency.
+**Implementation note**:
+- Primary label source: weather response timezone (for example, `America/Chicago` -> `Chicago`)
+- Fallback label: `Your Location`
+- No secondary reverse-geocoding service is required
 
-**Simpler revised decision**: Use `https://geocoding-api.open-meteo.com/v1/search?latitude={lat}&longitude={lon}` — however this endpoint is forward-only (name→coords). Instead: after getting coords from geolocation, pass them directly to the weather API and display the returned `timezone` string formatted as a readable location name (e.g., "America/Chicago" → "Chicago, America"). This is acceptable for a course project.
-
-**Final decision**: Call weather API directly with coords. For the display name, use `Intl.DateTimeFormat().resolvedOptions().timeZone` to get the local timezone string, then format it. If geolocation is used, display format will be "{timezone-city}, {timezone-region}" parsed from the timezone string (e.g., "America/Chicago" → "Chicago").
+**Rejected alternatives**:
+- Adding reverse-geocoding dependency just for naming (extra complexity)
+- Calling forward geocoding with latitude/longitude parameters (unsupported)
 
 ---
 

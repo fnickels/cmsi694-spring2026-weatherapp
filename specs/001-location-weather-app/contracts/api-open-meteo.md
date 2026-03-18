@@ -58,6 +58,7 @@ GET https://geocoding-api.open-meteo.com/v1/search?name=Chicago&count=10&languag
 ```
 
 **Fields used by the app**: `id`, `name`, `latitude`, `longitude`, `country`, `countryCode`, `admin1`  
+**Mapping note**: Raw API field `country_code` is mapped to internal model field `countryCode`.  
 **Fields ignored**: `elevation`, `feature_code`, `admin1_id`, `admin2_id`, `population`, `country_id`, `admin2`, `generationtime_ms`
 
 ### Empty Response (location not found)

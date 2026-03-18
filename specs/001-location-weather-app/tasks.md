@@ -46,7 +46,7 @@ This project will be built incrementally. Each user story is independently testa
 - [ ] T013 [P] Create `src/utils/unitConversions.js` with functions: `celsiusToFahrenheit()`, `fahrenheitToCelsius()`, `kmhToMph()`, `mphToKmh()`, `metresToMiles()`, `metresToKilometers()`, `getWindDirectionLabel(degrees)` (returns one of: N, NE, E, SE, S, SW, W, NW based on 0-360° bearing per data-model.md)
 - [ ] T014 [P] Create unit tests `tests/unit/wmoConditions.test.js` covering all 27 codes (WRITE TESTS FIRST, expect to fail)
 - [ ] T015 [P] Create unit tests `tests/unit/unitConversions.test.js` covering all conversion functions with edge cases (WRITE TESTS FIRST, expect to fail)
-- [ ] T016 Create `src/index.css` with dark glassmorphism base styles: dark gradient background (navy/sky-blue), CSS variables for colors
+- [ ] T016 Extend `src/index.css` with dark glassmorphism theme styles (dark gradient background, CSS variables, and utility class refinements) after Tailwind directives are in place
 - [ ] T017 [P] Create `src/services/geocoding.js` with `searchLocations(query)` function calling Open-Meteo Geocoding API (see contracts/api-open-meteo.md)
 - [ ] T018 [P] Create `src/services/weather.js` with `fetchWeather(latitude, longitude, unit)` function calling Open-Meteo Weather API
 - [ ] T019 Create `src/hooks/useWeather.js` hook that orchestrates: search → geocode → weather fetch; exposes `{ isLoading, error, currentWeather, selectedLocation, disambiguationList, search(query), selectLocation(location) }` (see data-model.md)
@@ -72,7 +72,7 @@ This project will be built incrementally. Each user story is independently testa
 - [ ] T026 [P] Create `src/components/WeatherStats.jsx` component: displays humidity, wind speed + direction (as cardinal labels N/NE/E/SE/S/SW/W/NW), visibility in a horizontal row (glassmorphism styling)
 - [ ] T027 [P] Create `src/components/LocationPicker.jsx` component: renders list of disambiguated locations; `onSelect(location)` callback on click; keyboard navigable (arrow keys, Enter, Tab)
 - [ ] T028 Create `src/App.jsx` root component wiring: `useWeather` hook, `useRecentSearches` hook, render SearchBar → LoadingSpinner | ErrorMessage | (WeatherCard + WeatherStats) | LocationPicker
-- [ ] T029 [P] Update `src/components/SearchBar.jsx` to validate empty input (do nothing if empty, show tooltip or brief message)
+- [ ] T029 [P] Refine `src/components/SearchBar.jsx` empty-input UX copy/state (accessible helper message timing and focus behavior)
 
 ### Testing for User Story 1 (TDD — write tests FIRST)
 
@@ -81,8 +81,13 @@ This project will be built incrementally. Each user story is independently testa
 - [ ] T032 Create integration test `tests/integration/SearchBar.test.jsx`: user types "Chicago", submits, mocked geocoding returns 1 result, mocked weather returns data, `WeatherCard` renders temperature and condition
 - [ ] T033 Create integration test `tests/integration/App.test.jsx` (failure path): user searches "InvalidXYZ", mocked geocoding returns 0 results, `ErrorMessage` is rendered with "location not found" text
 - [ ] T034 Create integration test `tests/integration/App.test.jsx` (API failure path): mocked geocoding API throws error (HTTP 503), `ErrorMessage` is rendered with an error message and user can try again
+- [ ] T097 Create integration test `tests/integration/SearchBar.test.jsx` (empty-search edge case): submitting empty/whitespace query does not call geocoding API and shows helper prompt
+- [ ] T098 Create integration test `tests/integration/SearchBar.test.jsx` (special-character/non-English edge case): query containing accented/non-Latin characters is passed through to geocoding request and handled gracefully
 - [ ] T087 Create integration test `tests/integration/App.test.jsx` (disambiguation path): mocked geocoding returns 2+ locations, user selects one, weather loads for selected location
 - [ ] T088 Create integration test `tests/integration/App.test.jsx` (malformed response path): mocked geocoding/weather returns invalid JSON shape, app shows service-unavailable error state
+- [ ] T093 Implement API timeout handling in `src/services/geocoding.js` and `src/services/weather.js` using `AbortController` with 8-second budget; map timeout to service-unavailable state
+- [ ] T094 Implement offline detection/error routing in `src/hooks/useWeather.js` (or equivalent) to display network-specific message and retry guidance
+- [ ] T095 Create integration tests `tests/integration/App.test.jsx` for timeout and offline scenarios: timeout/offline map to FR-008 service-unavailable or network-specific error states
 
 ### Final touches for User Story 1
 
@@ -102,15 +107,17 @@ This project will be built incrementally. Each user story is independently testa
 
 ### Implementation for User Story 2
 
-- [ ] T038 Update `src/components/SearchBar.jsx`: add "Use My Location" button that calls `onUseMyLocation()` prop; show geolocation state (loading/error in button text or nearby message)
+- [ ] T038 Update `src/components/SearchBar.jsx`: refine existing "Use My Location" button behavior to show geolocation loading/error states (button text, disabled state, and accessible status messaging)
 - [ ] T039 Update `src/hooks/useWeather.js`: add `requestGeolocation()` method that calls `useGeolocation()` hook to get coords, then directly fetches weather (bypassing geocoding); handle geolocation errors gracefully
 - [ ] T040 Update `src/App.jsx`: wire SearchBar's `onUseMyLocation()` to call `useWeather.requestGeolocation()`, handle geolocation error states
+- [ ] T091 Update geolocation rendering flow in `src/hooks/useWeather.js`/`src/App.jsx`: derive a human-readable auto-location label from timezone data and fall back to `"Your Location"` when unavailable
 
 ### Testing for User Story 2
 
 - [ ] T041 Create integration test `tests/integration/App.test.jsx`: mock `navigator.geolocation` to return valid coords, click "Use My Location", verify weather is displayed
 - [ ] T042 Create integration test `tests/integration/App.test.jsx`: mock `navigator.geolocation` to deny permission, click "Use My Location", verify geolocation error message is displayed
 - [ ] T043 Create test for older browser (geolocation unavailable): mock `navigator.geolocation` as undefined, verify friendly message is shown
+- [ ] T092 Create integration test `tests/integration/App.test.jsx`: geolocation success uses timezone-derived label and falls back to `"Your Location"` when label derivation is unavailable
 
 ### Final touches for User Story 2
 
@@ -203,11 +210,12 @@ This project will be built incrementally. Each user story is independently testa
 - [ ] T082 Final code review: check for console errors/warnings, unused imports, code style consistency
 - [ ] T083 Validate with quickstart.md: fresh clone, `npm install`, `npm run dev`, test all core flows (search, geolocation, unit toggle, recent searches)
 - [ ] T084 Create integration test `tests/integration/LocationSearch.test.jsx`: query 20 real valid locations via Open-Meteo Geocoding API (e.g., "New York", "London", "Tokyo") to verify SC-003 (95% success rate achieved with real data)
-- [ ] T085 Create performance test `tests/integration/Geolocation.perf.test.jsx`: mock geolocation with mocked weather API and measure time from "Use My Location" click to weather display; verify completes within 8 seconds per SC-007
-- [ ] T086 Add SC-006 UX validation: confirm search field label text is exactly "Enter location or city name", appears above the fold at 320px/768px/1920px, and is visually dominant as the first actionable control on initial load (capture screenshot evidence)
+- [ ] T085 Create performance validation for SC-007 in two parts: automated mocked pipeline timing plus manual real-device protocol (permission prompt through weather render) with recorded evidence for <8s target
+- [ ] T086 Add SC-006 UX validation with objective checks: exact label text, visible in initial viewport at 320px/768px/1920px, and first tabbable actionable control on initial load (plus screenshot evidence)
 - [ ] T090 Validate geolocation runtime requirements: confirm HTTPS/localhost requirement is documented and geolocation error messaging covers insecure-context/unavailable API cases
+- [ ] T096 Strengthen SC-005 oracle: add canonical WMO fixture assertions (code -> exact label + exact icon id) to validate icon/label correctness for all supported conditions
 
-**Checkpoint**: Feature complete, tested, documented, and ready for production.
+**Checkpoint**: Feature complete, tested, documented, and ready for local/demo release validation.
 
 ---
 

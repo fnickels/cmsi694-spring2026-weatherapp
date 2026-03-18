@@ -22,7 +22,7 @@
 
 - [x] CHK009 Is the geolocation-to-weather flow clearly specified (no intermediate geocoding step)? [Clarity, FR-005]
 - [x] CHK010 For ambiguous locations (multiple geocoding results), is the selection flow unambiguous (present list → user picks → fetch weather)? [Clarity, FR-007]
-- [x] CHK011 Are timezone handling requirements specified for auto-detected locations? [Clarity, Gap — Research §7 mentions but spec silent]
+- [x] CHK011 Are timezone handling requirements specified for auto-detected locations? [Clarity, FR-005 + Research §7]
 - [x] CHK012 Is the unit toggle behavior specified as client-side conversion with no network request? [Clarity, SC-004, Research §2]
 - [x] CHK013 Can "service unavailable" (FR-008) be objectively distinguished from "location not found" in error handling? [Clarity, FR-008]
 - [x] CHK014 Is the visibility unit handling unambiguous (always metres from API, client conversion required)? [Clarity, Research §2]
@@ -34,7 +34,7 @@
 - [x] CHK017 Is SC-003 (95% location success) defined in terms of real-world API behavior, not mocked data? [Consistency, SC-003, Research §1]
 - [x] CHK018 Is SC-004 (unit toggle <1s, no network request) explicitly contradictory to any API-called-on-toggle requirement? [Consistency, SC-004, Research §2]
 - [x] CHK019 Does SC-007 (geolocation flow <8s) account for both permission latency and API call latency? [Consistency, SC-007, FR-005]
-- [x] CHK020 Are all 15 FR requirements that touch APIs (FR-001, FR-002, FR-005, FR-006, FR-007, FR-008, FR-010, FR-012) traced to corresponding tests? [Traceability, Research §6]
+- [x] CHK020 Are all API-related FR requirements (FR-001, FR-002, FR-005, FR-006, FR-007, FR-008, FR-010, FR-012) traced to corresponding tests? [Traceability, Research §6]
 
 ## Acceptance Criteria Quality — Testing Strategy
 
@@ -61,16 +61,16 @@
 
 - [x] CHK036 Are all error messages user-facing and actionable (no API error codes exposed)? [Completeness, FR-008]
 - [x] CHK037 Does the spec distinguish between "location not found" (empty results) and "service unavailable" (5xx/timeout)? [Clarity, FR-008]
-- [x] CHK038 Is retry behavior specified or explicitly out-of-scope for this project? [Clarity, Gap]
-- [x] CHK039 Are timeout thresholds specified for API calls (or default fetch timeout used)? [Completeness, Gap]
-- [x] CHK040 Is offline/no-connectivity behavior specified (show error, suggest retry when online)? [Completeness, Gap]
+- [x] CHK038 Is retry behavior specified or explicitly out-of-scope for this project? [Clarity, Spec Assumptions]
+- [x] CHK039 Are timeout thresholds specified for API calls (or default fetch timeout used)? [Completeness, Spec Edge Cases + API Contract]
+- [x] CHK040 Is offline/no-connectivity behavior specified (show error, suggest retry when online)? [Completeness, Spec Edge Cases]
 
 ## Non-Functional Requirements — API Integration
 
 - [x] CHK041 Is SC-001 (5-second weather display) achievable with the documented APIs on broadband? [Measurability, SC-001]
 - [x] CHK042 Is SC-007 (8-second geolocation flow) feasible given permission request + geolocation + API latency? [Measurability, SC-007]
 - [x] CHK043 Are data size constraints documented (API response minimized via `forecast_days=1`)? [Completeness, Research §2]
-- [x] CHK044 Is HTTPS requirement for geolocation (localhost OK) documented? [Completeness, Gap]
+- [x] CHK044 Is HTTPS requirement for geolocation (localhost OK) documented? [Completeness, Quickstart Troubleshooting]
 
 ## Dependencies & Assumptions — API Layer
 
@@ -103,4 +103,4 @@
 - Dependencies & Assumptions: 4 items
 - Ambiguities & Conflicts: 5 items
 
-**Interpretation**: This checklist validates whether the requirements themselves (spec, contracts, research) are completely and clearly specified for API integration testing. Items marked `[Gap]` indicate missing requirements that should be added to spec.md before implementation begins. Items marked `[Ambiguity]` or `[Conflict]` indicate clarifications needed in planning documents.
+**Interpretation**: This checklist validates whether the requirements themselves (spec, contracts, research) are completely and clearly specified for API integration testing. Status should stay synchronized with current source artifacts.
