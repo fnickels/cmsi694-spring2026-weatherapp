@@ -22,17 +22,17 @@ This project will be built incrementally. Each user story is independently testa
 
 **Checkpoint**: `npm install && npm run dev` works, folder structure in place, no errors
 
-- [ ] T001 Initialize Vite + React project with `npm create vite@latest . -- --template react`
-- [ ] T002 [P] Install dependencies: React 18, Vite 5, Tailwind CSS 3, PostCSS, Autoprefixer
-- [ ] T003 [P] Install dev dependencies: Vitest, @testing-library/react, @testing-library/user-event, jsdom, @vitest/ui
-- [ ] T004 [P] Configure Tailwind CSS with `tailwind.config.js` and `postcss.config.js`
-- [ ] T005 [P] Create folder structure: `src/{components,hooks,services,utils}`, `tests/{unit,integration}`, `public/icons`
-- [ ] T006 [P] Configure Vitest in `vite.config.js` with jsdom environment and testing library globals
-- [ ] T007 Create `src/main.jsx` Vite entry point with root element mounting
-- [ ] T008 Create `src/index.css` with Tailwind directives (`@tailwind base`, `@tailwind components`, `@tailwind utilities`)
-- [ ] T009 Create `index.html` with root div and script tag
-- [ ] T010 [P] Create `.gitignore` entries for node_modules, dist, .vite, .env
-- [ ] T011 Verify: `npm run dev` starts localhost:5173 with working hot reload
+- [x] T001 Initialize Vite + React project with `npm create vite@latest . -- --template react`
+- [x] T002 [P] Install dependencies: React 18, Vite 5, Tailwind CSS 3, PostCSS, Autoprefixer
+- [x] T003 [P] Install dev dependencies: Vitest, @testing-library/react, @testing-library/user-event, jsdom, @vitest/ui
+- [x] T004 [P] Configure Tailwind CSS with `tailwind.config.js` and `postcss.config.js`
+- [x] T005 [P] Create folder structure: `src/{components,hooks,services,utils}`, `tests/{unit,integration}`, `public/icons`
+- [x] T006 [P] Configure Vitest in `vite.config.js` with jsdom environment and testing library globals
+- [x] T007 Create `src/main.jsx` Vite entry point with root element mounting
+- [x] T008 Create `src/index.css` with Tailwind directives (`@tailwind base`, `@tailwind components`, `@tailwind utilities`)
+- [x] T009 Create `index.html` with root div and script tag
+- [x] T010 [P] Create `.gitignore` entries for node_modules, dist, .vite, .env
+- [x] T011 Verify: `npm run dev` starts localhost:5173 with working hot reload
 
 ---
 
@@ -42,16 +42,16 @@ This project will be built incrementally. Each user story is independently testa
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T012 [P] Create `src/utils/wmoConditions.js` with all 27 WMO code → label/icon mappings (see research.md §3)
-- [ ] T013 [P] Create `src/utils/unitConversions.js` with functions: `celsiusToFahrenheit()`, `fahrenheitToCelsius()`, `kmhToMph()`, `mphToKmh()`, `metresToMiles()`, `metresToKilometers()`, `getWindDirectionLabel(degrees)` (returns one of: N, NE, E, SE, S, SW, W, NW based on 0-360° bearing per data-model.md)
-- [ ] T014 [P] Create unit tests `tests/unit/wmoConditions.test.js` covering all 27 codes (WRITE TESTS FIRST, expect to fail)
-- [ ] T015 [P] Create unit tests `tests/unit/unitConversions.test.js` covering all conversion functions with edge cases (WRITE TESTS FIRST, expect to fail)
-- [ ] T016 Extend `src/index.css` with dark glassmorphism theme styles (dark gradient background, CSS variables, and utility class refinements) after Tailwind directives are in place
-- [ ] T017 [P] Create `src/services/geocoding.js` with `searchLocations(query)` function calling Open-Meteo Geocoding API (see contracts/api-open-meteo.md)
-- [ ] T018 [P] Create `src/services/weather.js` with `fetchWeather(latitude, longitude, unit)` function calling Open-Meteo Weather API
-- [ ] T019 Create `src/hooks/useWeather.js` hook that orchestrates: search → geocode → weather fetch; exposes `{ isLoading, error, currentWeather, selectedLocation, disambiguationList, search(query), selectLocation(location) }` (see data-model.md)
-- [ ] T020 Create `src/hooks/useGeolocation.js` hook that wraps `navigator.geolocation.getCurrentPosition()`; exposes `{ latitude, longitude, error, isLoading, requestLocation() }` (see research.md §7)
-- [ ] T021 Create `src/hooks/useRecentSearches.js` hook that reads/writes to `sessionStorage` under key `"weatherapp.recentSearches"`; exposes `{ searches: RecentSearch[], addSearch(location), clear() }` (see data-model.md)
+- [x] T012 [P] Create `src/utils/wmoConditions.js` with all 27 WMO code → label/icon mappings (see research.md §3)
+- [x] T013 [P] Create `src/utils/unitConversions.js` with functions: `celsiusToFahrenheit()`, `fahrenheitToCelsius()`, `kmhToMph()`, `mphToKmh()`, `metresToMiles()`, `metresToKilometers()`, `getWindDirectionLabel(degrees)` (returns one of: N, NE, E, SE, S, SW, W, NW based on 0-360° bearing per data-model.md)
+- [x] T014 [P] Create unit tests `tests/unit/wmoConditions.test.js` covering all 27 codes (WRITE TESTS FIRST, expect to fail)
+- [x] T015 [P] Create unit tests `tests/unit/unitConversions.test.js` covering all conversion functions with edge cases (WRITE TESTS FIRST, expect to fail)
+- [x] T016 Extend `src/index.css` with dark glassmorphism theme styles (dark gradient background, CSS variables, and utility class refinements) after Tailwind directives are in place
+- [x] T017 [P] Create `src/services/geocoding.js` with `searchLocations(query)` function calling Open-Meteo Geocoding API (see contracts/api-open-meteo.md)
+- [x] T018 [P] Create `src/services/weather.js` with `fetchWeather(latitude, longitude, unit)` function calling Open-Meteo Weather API
+- [x] T019 Create `src/hooks/useWeather.js` hook that orchestrates: search → geocode → weather fetch; exposes `{ isLoading, error, currentWeather, selectedLocation, disambiguationList, search(query), selectLocation(location) }` (see data-model.md)
+- [x] T020 Create `src/hooks/useGeolocation.js` hook that wraps `navigator.geolocation.getCurrentPosition()`; exposes `{ latitude, longitude, error, isLoading, requestLocation() }` (see research.md §7)
+- [x] T021 Create `src/hooks/useRecentSearches.js` hook that reads/writes to `sessionStorage` under key `"weatherapp.recentSearches"`; exposes `{ searches: RecentSearch[], addSearch(location), clear() }` (see data-model.md)
 
 **Checkpoint**: Foundation ready — all utilities tested, all hooks created, services ready for use
 
@@ -65,35 +65,35 @@ This project will be built incrementally. Each user story is independently testa
 
 ### Component Implementation for User Story 1
 
-- [ ] T022 [P] Create `src/components/LoadingSpinner.jsx` component with animated spinner and `role="status" aria-live="polite"`
-- [ ] T023 [P] Create `src/components/ErrorMessage.jsx` component with user-friendly error text and optional dismiss callback button
-- [ ] T024 [P] Create `src/components/SearchBar.jsx` component: text input + submit button + "Use My Location" button; validates non-empty before submit; exposes `onSearch(query)`, `onUseMyLocation()`, `isLoading` props
-- [ ] T025 [P] Create `src/components/WeatherCard.jsx` component: displays condition icon (from Meteocons), temperature, feels-like temp, weather condition label, location name, observation time (glassmorphism styling); does NOT display wind direction (handled by WeatherStats)
-- [ ] T026 [P] Create `src/components/WeatherStats.jsx` component: displays humidity, wind speed + direction (as cardinal labels N/NE/E/SE/S/SW/W/NW), visibility in a horizontal row (glassmorphism styling)
-- [ ] T027 [P] Create `src/components/LocationPicker.jsx` component: renders list of disambiguated locations; `onSelect(location)` callback on click; keyboard navigable (arrow keys, Enter, Tab)
-- [ ] T028 Create `src/App.jsx` root component wiring: `useWeather` hook, `useRecentSearches` hook, render SearchBar → LoadingSpinner | ErrorMessage | (WeatherCard + WeatherStats) | LocationPicker
-- [ ] T029 [P] Refine `src/components/SearchBar.jsx` empty-input UX copy/state (accessible helper message timing and focus behavior)
+- [x] T022 [P] Create `src/components/LoadingSpinner.jsx` component with animated spinner and `role="status" aria-live="polite"`
+- [x] T023 [P] Create `src/components/ErrorMessage.jsx` component with user-friendly error text and optional dismiss callback button
+- [x] T024 [P] Create `src/components/SearchBar.jsx` component: text input + submit button + "Use My Location" button; validates non-empty before submit; exposes `onSearch(query)`, `onUseMyLocation()`, `isLoading` props
+- [x] T025 [P] Create `src/components/WeatherCard.jsx` component: displays condition icon (from Meteocons), temperature, feels-like temp, weather condition label, location name, observation time (glassmorphism styling); does NOT display wind direction (handled by WeatherStats)
+- [x] T026 [P] Create `src/components/WeatherStats.jsx` component: displays humidity, wind speed + direction (as cardinal labels N/NE/E/SE/S/SW/W/NW), visibility in a horizontal row (glassmorphism styling)
+- [x] T027 [P] Create `src/components/LocationPicker.jsx` component: renders list of disambiguated locations; `onSelect(location)` callback on click; keyboard navigable (arrow keys, Enter, Tab)
+- [x] T028 Create `src/App.jsx` root component wiring: `useWeather` hook, `useRecentSearches` hook, render SearchBar → LoadingSpinner | ErrorMessage | (WeatherCard + WeatherStats) | LocationPicker
+- [x] T029 [P] Refine `src/components/SearchBar.jsx` empty-input UX copy/state (accessible helper message timing and focus behavior)
 
 ### Testing for User Story 1 (TDD — write tests FIRST)
 
-- [ ] T030 [P] Run test suite and update `src/utils/wmoConditions.js` implementation until T014 assertions pass
-- [ ] T031 [P] Run test suite and update `src/utils/unitConversions.js` implementation until T015 assertions pass
-- [ ] T032 Create integration test `tests/integration/SearchBar.test.jsx`: user types "Chicago", submits, mocked geocoding returns 1 result, mocked weather returns data, `WeatherCard` renders temperature and condition
-- [ ] T033 Create integration test `tests/integration/App.test.jsx` (failure path): user searches "InvalidXYZ", mocked geocoding returns 0 results, `ErrorMessage` is rendered with "location not found" text
-- [ ] T034 Create integration test `tests/integration/App.test.jsx` (API failure path): mocked geocoding API throws error (HTTP 503), `ErrorMessage` is rendered with an error message and user can try again
-- [ ] T097 Create integration test `tests/integration/SearchBar.test.jsx` (empty-search edge case): submitting empty/whitespace query does not call geocoding API and shows helper prompt
-- [ ] T098 Create integration test `tests/integration/SearchBar.test.jsx` (special-character/non-English edge case): query containing accented/non-Latin characters is passed through to geocoding request and handled gracefully
-- [ ] T087 Create integration test `tests/integration/App.test.jsx` (disambiguation path): mocked geocoding returns 2+ locations, user selects one, weather loads for selected location
-- [ ] T088 Create integration test `tests/integration/App.test.jsx` (malformed response path): mocked geocoding/weather returns invalid JSON shape, app shows service-unavailable error state
-- [ ] T093 Implement API timeout handling in `src/services/geocoding.js` and `src/services/weather.js` using `AbortController` with 8-second budget; map timeout to service-unavailable state
-- [ ] T094 Implement offline detection/error routing in `src/hooks/useWeather.js` (or equivalent) to display network-specific message and retry guidance
-- [ ] T095 Create integration tests `tests/integration/App.test.jsx` for timeout and offline scenarios: timeout/offline map to FR-008 service-unavailable or network-specific error states
+- [x] T030 [P] Run test suite and update `src/utils/wmoConditions.js` implementation until T014 assertions pass
+- [x] T031 [P] Run test suite and update `src/utils/unitConversions.js` implementation until T015 assertions pass
+- [x] T032 Create integration test `tests/integration/SearchBar.test.jsx`: user types "Chicago", submits, mocked geocoding returns 1 result, mocked weather returns data, `WeatherCard` renders temperature and condition
+- [x] T033 Create integration test `tests/integration/App.test.jsx` (failure path): user searches "InvalidXYZ", mocked geocoding returns 0 results, `ErrorMessage` is rendered with "location not found" text
+- [x] T034 Create integration test `tests/integration/App.test.jsx` (API failure path): mocked geocoding API throws error (HTTP 503), `ErrorMessage` is rendered with an error message and user can try again
+- [x] T097 Create integration test `tests/integration/SearchBar.test.jsx` (empty-search edge case): submitting empty/whitespace query does not call geocoding API and shows helper prompt
+- [x] T098 Create integration test `tests/integration/SearchBar.test.jsx` (special-character/non-English edge case): query containing accented/non-Latin characters is passed through to geocoding request and handled gracefully
+- [x] T087 Create integration test `tests/integration/App.test.jsx` (disambiguation path): mocked geocoding returns 2+ locations, user selects one, weather loads for selected location
+- [x] T088 Create integration test `tests/integration/App.test.jsx` (malformed response path): mocked geocoding/weather returns invalid JSON shape, app shows service-unavailable error state
+- [x] T093 Implement API timeout handling in `src/services/geocoding.js` and `src/services/weather.js` using `AbortController` with 8-second budget; map timeout to service-unavailable state
+- [x] T094 Implement offline detection/error routing in `src/hooks/useWeather.js` (or equivalent) to display network-specific message and retry guidance
+- [x] T095 Create integration tests `tests/integration/App.test.jsx` for timeout and offline scenarios: timeout/offline map to FR-008 service-unavailable or network-specific error states
 
 ### Final touches for User Story 1
 
-- [ ] T035 Verify `npm test` passes all tests for US1
-- [ ] T036 Manual QA: Open browser, search for a real city, verify all required fields (temp, feels-like, condition, humidity, wind, visibility) are displayed correctly
-- [ ] T037 Manual QA: Search for invalid location, verify error message is displayed
+- [x] T035 Verify `npm test` passes all tests for US1
+- [x] T036 Manual QA: Open browser, search for a real city, verify all required fields (temp, feels-like, condition, humidity, wind, visibility) are displayed correctly
+- [x] T037 Manual QA: Search for invalid location, verify error message is displayed
 
 **Checkpoint**: User Story 1 is complete and independently testable. PM can approve and demo this as MVP.
 
@@ -107,21 +107,21 @@ This project will be built incrementally. Each user story is independently testa
 
 ### Implementation for User Story 2
 
-- [ ] T038 Update `src/components/SearchBar.jsx`: refine existing "Use My Location" button behavior to show geolocation loading/error states (button text, disabled state, and accessible status messaging)
-- [ ] T039 Update `src/hooks/useWeather.js`: add `requestGeolocation()` method that calls `useGeolocation()` hook to get coords, then directly fetches weather (bypassing geocoding); handle geolocation errors gracefully
-- [ ] T040 Update `src/App.jsx`: wire SearchBar's `onUseMyLocation()` to call `useWeather.requestGeolocation()`, handle geolocation error states
-- [ ] T091 Update geolocation rendering flow in `src/hooks/useWeather.js`/`src/App.jsx`: derive a human-readable auto-location label from timezone data and fall back to `"Your Location"` when unavailable
+- [x] T038 Update `src/components/SearchBar.jsx`: refine existing "Use My Location" button behavior to show geolocation loading/error states (button text, disabled state, and accessible status messaging)
+- [x] T039 Update `src/hooks/useWeather.js`: add `requestGeolocation()` method that calls `useGeolocation()` hook to get coords, then directly fetches weather (bypassing geocoding); handle geolocation errors gracefully
+- [x] T040 Update `src/App.jsx`: wire SearchBar's `onUseMyLocation()` to call `useWeather.requestGeolocation()`, handle geolocation error states
+- [x] T091 Update geolocation rendering flow in `src/hooks/useWeather.js`/`src/App.jsx`: derive a human-readable auto-location label from timezone data and fall back to `"Your Location"` when unavailable
 
 ### Testing for User Story 2
 
-- [ ] T041 Create integration test `tests/integration/App.test.jsx`: mock `navigator.geolocation` to return valid coords, click "Use My Location", verify weather is displayed
-- [ ] T042 Create integration test `tests/integration/App.test.jsx`: mock `navigator.geolocation` to deny permission, click "Use My Location", verify geolocation error message is displayed
-- [ ] T043 Create test for older browser (geolocation unavailable): mock `navigator.geolocation` as undefined, verify friendly message is shown
-- [ ] T092 Create integration test `tests/integration/App.test.jsx`: geolocation success uses timezone-derived label and falls back to `"Your Location"` when label derivation is unavailable
+- [x] T041 Create integration test `tests/integration/App.test.jsx`: mock `navigator.geolocation` to return valid coords, click "Use My Location", verify weather is displayed
+- [x] T042 Create integration test `tests/integration/App.test.jsx`: mock `navigator.geolocation` to deny permission, click "Use My Location", verify geolocation error message is displayed
+- [x] T043 Create test for older browser (geolocation unavailable): mock `navigator.geolocation` as undefined, verify friendly message is shown
+- [x] T092 Create integration test `tests/integration/App.test.jsx`: geolocation success uses timezone-derived label and falls back to `"Your Location"` when label derivation is unavailable
 
 ### Final touches for User Story 2
 
-- [ ] T044 Manual QA: On a real device (or Chrome dev tools location spoofing), click "Use My Location", verify weather for current location appears
+- [x] T044 Manual QA: On a real device (or Chrome dev tools location spoofing), click "Use My Location", verify weather for current location appears
 
 **Checkpoint**: User Story 2 is complete. Both US1 and US2 work independently.
 
@@ -135,26 +135,26 @@ This project will be built incrementally. Each user story is independently testa
 
 ### Implementation for User Story 3
 
-- [ ] T045 [P] Create `src/components/UnitToggle.jsx` component: toggle between "°F" and "°C"; `unit` prop and `onToggle()` callback
-- [ ] T046 Update `src/hooks/useWeather.js`: implement `toggleUnits()` method that updates `unitPreference` and recomputes display values locally from normalized metric state (no network request on toggle)
-- [ ] T047 Update `src/hooks/useRecentSearches.js` to also write/read `sessionStorage` key `"weatherapp.unitPreference"` with value `"imperial"` or `"metric"` (default: `"imperial"`)
-- [ ] T048 Update `src/App.jsx`: manage `unitPreference` state, pass to `useWeather` hook, render `UnitToggle` in header, call `toggleUnits()` on unit toggle click
-- [ ] T049 Update `src/components/WeatherCard.jsx` and `WeatherStats.jsx`: accept `unit` prop and format display strings with correct units (e.g., pass `"45°F"` or `"7°C"` for temperature, wind speed as `"12 mph"` or `"19 km/h"`, wind direction as cardinal labels remain unit-agnostic)
-- [ ] T050 Update `src/services/weather.js`: fetch weather in canonical metric units and normalize API response for client-side display conversion (unit toggle must not trigger additional network requests)
+- [x] T045 [P] Create `src/components/UnitToggle.jsx` component: toggle between "°F" and "°C"; `unit` prop and `onToggle()` callback
+- [x] T046 Update `src/hooks/useWeather.js`: implement `toggleUnits()` method that updates `unitPreference` and recomputes display values locally from normalized metric state (no network request on toggle)
+- [x] T047 Update `src/hooks/useRecentSearches.js` to also write/read `sessionStorage` key `"weatherapp.unitPreference"` with value `"imperial"` or `"metric"` (default: `"imperial"`)
+- [x] T048 Update `src/App.jsx`: manage `unitPreference` state, pass to `useWeather` hook, render `UnitToggle` in header, call `toggleUnits()` on unit toggle click
+- [x] T049 Update `src/components/WeatherCard.jsx` and `WeatherStats.jsx`: accept `unit` prop and format display strings with correct units (e.g., pass `"45°F"` or `"7°C"` for temperature, wind speed as `"12 mph"` or `"19 km/h"`, wind direction as cardinal labels remain unit-agnostic)
+- [x] T050 Update `src/services/weather.js`: fetch weather in canonical metric units and normalize API response for client-side display conversion (unit toggle must not trigger additional network requests)
 
 ### Testing for User Story 3
 
-- [ ] T051 Create integration test `tests/integration/App.test.jsx`: load weather in imperial, click metric toggle, verify all values convert correctly and display with metric units
-- [ ] T052 Create integration test `tests/integration/App.test.jsx`: toggle unit twice, verify it returns to original state (roundtrip conversion)
-- [ ] T053 Create integration test: search for new location after toggling to metric, verify new weather also displays in metric (unit preference persists)
-- [ ] T054 Create test: reload page after toggling to metric, verify metric is still active (sessionStorage persistence)
-- [ ] T089 Create integration assertion for SC-004: spy on `fetch` during unit toggle and verify no additional network request is made
+- [x] T051 Create integration test `tests/integration/App.test.jsx`: load weather in imperial, click metric toggle, verify all values convert correctly and display with metric units
+- [x] T052 Create integration test `tests/integration/App.test.jsx`: toggle unit twice, verify it returns to original state (roundtrip conversion)
+- [x] T053 Create integration test: search for new location after toggling to metric, verify new weather also displays in metric (unit preference persists)
+- [x] T054 Create test: reload page after toggling to metric, verify metric is still active (sessionStorage persistence)
+- [x] T089 Create integration assertion for SC-004: spy on `fetch` during unit toggle and verify no additional network request is made
 
 ### Final touches for User Story 3
 
-- [ ] T055 Manual QA: Load weather, toggle to metric, verify all numeric values convert and units change (°C, km/h, km)
-- [ ] T056 Manual QA: Toggle back to imperial, verify conversion is accurate
-- [ ] T057 Manual QA: Refresh page, verify unit preference is remembered
+- [x] T055 Manual QA: Load weather, toggle to metric, verify all numeric values convert and units change (°C, km/h, km)
+- [x] T056 Manual QA: Toggle back to imperial, verify conversion is accurate
+- [x] T057 Manual QA: Refresh page, verify unit preference is remembered
 
 **Checkpoint**: User Stories 1, 2, and 3 all work independently.
 
@@ -168,24 +168,24 @@ This project will be built incrementally. Each user story is independently testa
 
 ### Implementation for User Story 4
 
-- [ ] T058 Create `src/components/RecentSearches.jsx` component: renders horizontal row of pill/chip buttons; each has `onClick` handler; hidden when list is empty
-- [ ] T059 Update `src/hooks/useRecentSearches.js`: implement `addSearch(location)` to append location to sessionStorage list, drop oldest if >5 entries, handle duplicates (move to front, update timestamp)
-- [ ] T060 Update `src/hooks/useWeather.js`: after successful weather fetch, call `addSearch(selectedLocation)` to record in recent searches
-- [ ] T061 Update `src/App.jsx`: pass `recentSearches` from hook to `RecentSearches` component; wire `onSelect` to call `useWeather.selectLocation()` for direct weather fetch
-- [ ] T062 Update `src/components/RecentSearches.jsx`: each chip is a `<button>` with `aria-label="Show weather for {displayName}"`
+- [x] T058 Create `src/components/RecentSearches.jsx` component: renders horizontal row of pill/chip buttons; each has `onClick` handler; hidden when list is empty
+- [x] T059 Update `src/hooks/useRecentSearches.js`: implement `addSearch(location)` to append location to sessionStorage list, drop oldest if >5 entries, handle duplicates (move to front, update timestamp)
+- [x] T060 Update `src/hooks/useWeather.js`: after successful weather fetch, call `addSearch(selectedLocation)` to record in recent searches
+- [x] T061 Update `src/App.jsx`: pass `recentSearches` from hook to `RecentSearches` component; wire `onSelect` to call `useWeather.selectLocation()` for direct weather fetch
+- [x] T062 Update `src/components/RecentSearches.jsx`: each chip is a `<button>` with `aria-label="Show weather for {displayName}"`
 
 ### Testing for User Story 4
 
-- [ ] T063 Create integration test `tests/integration/App.test.jsx`: search for city A, search for city B, search for city C, verify all 3 appear in recent searches list
-- [ ] T064 Create test: search for city A, click in recent searches, verify weather loads immediately without a new search request
-- [ ] T065 Create test: search for 6 different cities, verify only 5 most recent are shown (oldest drops off)
-- [ ] T066 Create test: search for same city twice, verify it appears once in recent (not duplicated) and is at the front
+- [x] T063 Create integration test `tests/integration/App.test.jsx`: search for city A, search for city B, search for city C, verify all 3 appear in recent searches list
+- [x] T064 Create test: search for city A, click in recent searches, verify weather loads immediately without a new search request
+- [x] T065 Create test: search for 6 different cities, verify only 5 most recent are shown (oldest drops off)
+- [x] T066 Create test: search for same city twice, verify it appears once in recent (not duplicated) and is at the front
 
 ### Final touches for User Story 4
 
-- [ ] T067 Manual QA: Perform several searches, verify recent list populates and updates correctly
-- [ ] T068 Manual QA: Click a recent search, verify weather loads without a new search input
-- [ ] T069 Manual QA: Refresh page, verify recent searches are preserved (sessionStorage persists)
+- [x] T067 Manual QA: Perform several searches, verify recent list populates and updates correctly
+- [x] T068 Manual QA: Click a recent search, verify weather loads without a new search input
+- [x] T069 Manual QA: Refresh page, verify recent searches are preserved (sessionStorage persists)
 
 **Checkpoint**: All 4 user stories are complete and independently testable.
 
@@ -195,25 +195,25 @@ This project will be built incrementally. Each user story is independently testa
 
 **Purpose**: Accessibility, responsive design, documentation, and final validation
 
-- [ ] T070 [P] Accessibility audit: verify all interactive elements are keyboard navigable (Tab, Enter, Space, Arrow keys)
-- [ ] T071 [P] Accessibility audit: verify all non-decorative icons have `alt` text or `aria-label`
-- [ ] T072 [P] Accessibility audit: verify color contrast ratios meet WCAG 2.1 AA (minimum 4.5:1 for normal text) — run automated tool or manual check
+- [x] T070 [P] Accessibility audit: verify all interactive elements are keyboard navigable (Tab, Enter, Space, Arrow keys)
+- [x] T071 [P] Accessibility audit: verify all non-decorative icons have `alt` text or `aria-label`
+- [x] T072 [P] Accessibility audit: verify color contrast ratios meet WCAG 2.1 AA (minimum 4.5:1 for normal text) — run automated tool or manual check
 - [ ] T073 [P] Accessibility audit: test with screen reader (NVDA or JAWS) to verify landmark structure and button/link labels
-- [ ] T074 Mobile responsiveness: test on viewport sizes 320px (phone), 768px (tablet), 1920px (desktop widescreen) — verify layout adapts correctly
-- [ ] T075 Test geolocation behavior on mobile device (iOS/Android) — verify permission flow works
-- [ ] T076 Update `README.md` in repository root: add "Installation", "Running Locally", "Testing", "Building" sections with commands from quickstart.md
-- [ ] T077 Verify `npm run build` produces valid `dist/` output with no errors
-- [ ] T078 Verify `.gitignore` includes `dist/`, `.vite/`, `node_modules/`, and `.env*`; update only if any entry is missing
-- [ ] T079 Run full test suite: `npm test` passes all unit + integration tests
-- [ ] T080 Performance check: verify 5s target for weather display on broadband (use Chrome DevTools Network throttling)
-- [ ] T081 Cross-browser test: verify app works on Chrome, Firefox, Safari, Edge (latest versions)
-- [ ] T082 Final code review: check for console errors/warnings, unused imports, code style consistency
-- [ ] T083 Validate with quickstart.md: fresh clone, `npm install`, `npm run dev`, test all core flows (search, geolocation, unit toggle, recent searches)
-- [ ] T084 Create integration test `tests/integration/LocationSearch.test.jsx`: query 20 real valid locations via Open-Meteo Geocoding API (e.g., "New York", "London", "Tokyo") to verify SC-003 (95% success rate achieved with real data)
-- [ ] T085 Create performance validation for SC-007 in two parts: automated mocked pipeline timing plus manual real-device protocol (permission prompt through weather render) with recorded evidence for <8s target
-- [ ] T086 Add SC-006 UX validation with objective checks: exact label text, visible in initial viewport at 320px/768px/1920px, and first tabbable actionable control on initial load (plus screenshot evidence)
-- [ ] T090 Validate geolocation runtime requirements: confirm HTTPS/localhost requirement is documented and geolocation error messaging covers insecure-context/unavailable API cases
-- [ ] T096 Strengthen SC-005 oracle: add canonical WMO fixture assertions (code -> exact label + exact icon id) to validate icon/label correctness for all supported conditions
+- [x] T074 Mobile responsiveness: test on viewport sizes 320px (phone), 768px (tablet), 1920px (desktop widescreen) — verify layout adapts correctly
+- [x] T075 Test geolocation behavior on mobile device (iOS/Android) — verify permission flow works
+- [x] T076 Update `README.md` in repository root: add "Installation", "Running Locally", "Testing", "Building" sections with commands from quickstart.md
+- [x] T077 Verify `npm run build` produces valid `dist/` output with no errors
+- [x] T078 Verify `.gitignore` includes `dist/`, `.vite/`, `node_modules/`, and `.env*`; update only if any entry is missing
+- [x] T079 Run full test suite: `npm test` passes all unit + integration tests
+- [x] T080 Performance check: verify 5s target for weather display on broadband (use Chrome DevTools Network throttling)
+- [x] T081 Cross-browser test: verify app works on Chrome, Firefox, Safari, Edge (latest versions)
+- [x] T082 Final code review: check for console errors/warnings, unused imports, code style consistency
+- [x] T083 Validate with quickstart.md: fresh clone, `npm install`, `npm run dev`, test all core flows (search, geolocation, unit toggle, recent searches)
+- [x] T084 Create integration test `tests/integration/LocationSearch.test.jsx`: query 20 real valid locations via Open-Meteo Geocoding API (e.g., "New York", "London", "Tokyo") to verify SC-003 (95% success rate achieved with real data)
+- [x] T085 Create performance validation for SC-007 in two parts: automated mocked pipeline timing plus manual real-device protocol (permission prompt through weather render) with recorded evidence for <8s target
+- [x] T086 Add SC-006 UX validation with objective checks: exact label text, visible in initial viewport at 320px/768px/1920px, and first tabbable actionable control on initial load (plus screenshot evidence)
+- [x] T090 Validate geolocation runtime requirements: confirm HTTPS/localhost requirement is documented and geolocation error messaging covers insecure-context/unavailable API cases
+- [x] T096 Strengthen SC-005 oracle: add canonical WMO fixture assertions (code -> exact label + exact icon id) to validate icon/label correctness for all supported conditions
 
 **Checkpoint**: Feature complete, tested, documented, and ready for local/demo release validation.
 
