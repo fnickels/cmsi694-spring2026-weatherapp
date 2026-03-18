@@ -27,6 +27,19 @@ go.work.sum
 # env file
 .env
 
+# Node/Vite artifacts
+node_modules/
+dist/
+.vite/
+.env*
+*.log
+
+# Universal
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+
 # Editor/IDE
 # .idea/
 # .vscode/

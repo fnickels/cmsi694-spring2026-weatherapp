@@ -49,8 +49,10 @@ MUST be documented so maintainers can diagnose issues quickly.
 
 ## Technical Baseline
 
-- The project MUST provide both a frontend interface and a backend service endpoint
-	for dynamic data exchange.
+- The project MUST provide a frontend interface and, when required by security or
+	business logic, a backend service endpoint for dynamic data exchange. For keyless,
+	CORS-enabled public APIs with no sensitive processing, a frontend-only integration
+	is permitted when explicitly documented in planning artifacts.
 - The project MUST store configuration in environment variables or config files that
 	are excluded from source control when sensitive.
 - The project MUST include a repeatable local setup path documented in README.
