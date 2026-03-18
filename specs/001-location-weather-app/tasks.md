@@ -1,0 +1,294 @@
+# Tasks: Location-Based Current Weather App
+
+**Branch**: `001-location-weather-app` | **Date**: 2026-03-17  
+**Input**: Design documents from `/specs/001-location-weather-app/` (spec.md, plan.md, research.md, data-model.md, contracts/)
+
+---
+
+## Overview
+
+This project will be built incrementally. Each user story is independently testable and deployable. The MVP is **User Story 1** (P1) — the core search-by-location feature. Additional priorities add geolocation, unit toggle, and recent searches.
+
+**Tech Stack**: React 18 + Vite 5 + Tailwind CSS 3 + Vitest + Testing Library  
+**Testing**: Vitest + @testing-library/react + @testing-library/user-event + jsdom  
+**APIs**: Open-Meteo (geocoding + weather, no API key)  
+**Storage**: `sessionStorage` for unit preference + recent searches
+
+---
+
+## Phase 1: Setup (Project Initialization)
+
+**Purpose**: Initialize the Vite+React+Tailwind environment and basic folder structure
+
+**Checkpoint**: `npm install && npm run dev` works, folder structure in place, no errors
+
+- [ ] T001 Initialize Vite + React project with `npm create vite@latest . -- --template react`
+- [ ] T002 [P] Install dependencies: React 18, Vite 5, Tailwind CSS 3, PostCSS, Autoprefixer
+- [ ] T003 [P] Install dev dependencies: Vitest, @testing-library/react, @testing-library/user-event, jsdom, @vitest/ui
+- [ ] T004 [P] Configure Tailwind CSS with `tailwind.config.js` and `postcss.config.js`
+- [ ] T005 [P] Create folder structure: `src/{components,hooks,services,utils}`, `tests/{unit,integration}`, `public/icons`
+- [ ] T006 [P] Configure Vitest in `vite.config.js` with jsdom environment and testing library globals
+- [ ] T007 Create `src/main.jsx` Vite entry point with root element mounting
+- [ ] T008 Create `src/index.css` with Tailwind directives (`@tailwind base`, `@tailwind components`, `@tailwind utilities`)
+- [ ] T009 Create `index.html` with root div and script tag
+- [ ] T010 [P] Create `.gitignore` entries for node_modules, dist, .vite, .env
+- [ ] T011 Verify: `npm run dev` starts localhost:5173 with working hot reload
+
+---
+
+## Phase 2: Foundational (Blocking Prerequisites)
+
+**Purpose**: Core utilities, services, and infrastructure that all user stories depend on
+
+**⚠️ CRITICAL**: No user story work can begin until this phase is complete
+
+- [ ] T012 [P] Create `src/utils/wmoConditions.js` with all 27 WMO code → label/icon mappings (see research.md §3)
+- [ ] T013 [P] Create `src/utils/unitConversions.js` with functions: `celsiusToFahrenheit()`, `fahrenheitToCelsius()`, `kmhToMph()`, `mphToKmh()`, `metresToMiles()`, `metresToKilometers()`, `getWindDirectionLabel()`
+- [ ] T014 [P] Create unit tests `tests/unit/wmoConditions.test.js` covering all 27 codes (WRITE TESTS FIRST, expect to fail)
+- [ ] T015 [P] Create unit tests `tests/unit/unitConversions.test.js` covering all conversion functions with edge cases (WRITE TESTS FIRST, expect to fail)
+- [ ] T016 Create `src/index.css` with dark glassmorphism base styles: dark gradient background (navy/sky-blue), CSS variables for colors
+- [ ] T017 [P] Create `src/services/geocoding.js` with `searchLocations(query)` function calling Open-Meteo Geocoding API (see contracts/api-open-meteo.md)
+- [ ] T018 [P] Create `src/services/weather.js` with `fetchWeather(latitude, longitude, unit)` function calling Open-Meteo Weather API
+- [ ] T019 Create `src/hooks/useWeather.js` hook that orchestrates: search → geocode → weather fetch; exposes `{ isLoading, error, currentWeather, selectedLocation, disambiguationList, search(query), selectLocation(location) }` (see data-model.md)
+- [ ] T020 Create `src/hooks/useGeolocation.js` hook that wraps `navigator.geolocation.getCurrentPosition()`; exposes `{ latitude, longitude, error, isLoading, requestLocation() }` (see research.md §7)
+- [ ] T021 Create `src/hooks/useRecentSearches.js` hook that reads/writes to `sessionStorage` under key `"weatherapp.recentSearches"`; exposes `{ searches: RecentSearch[], addSearch(location), clear() }` (see data-model.md)
+
+**Checkpoint**: Foundation ready — all utilities tested, all hooks created, services ready for use
+
+---
+
+## Phase 3: User Story 1 - Search Weather by Location Name (Priority: P1) 🎯 MVP
+
+**Goal**: Users can type a city name, submit, and see current weather conditions, or get a friendly error.
+
+**Independent Test**: Enter "Los Angeles" and verify temperature, condition, humidity, wind are displayed. Enter invalid city and verify error message.
+
+### Component Implementation for User Story 1
+
+- [ ] T022 [P] Create `src/components/LoadingSpinner.jsx` component with animated spinner and `role="status" aria-live="polite"`
+- [ ] T023 [P] Create `src/components/ErrorMessage.jsx` component with user-friendly error text and optional dismiss callback button
+- [ ] T024 [P] Create `src/components/SearchBar.jsx` component: text input + submit button + "Use My Location" button; validates non-empty before submit; exposes `onSearch(query)`, `onUseMyLocation()`, `isLoading` props
+- [ ] T025 [P] Create `src/components/WeatherCard.jsx` component: displays condition icon (from Meteocons), temperature, feels-like temp, weather condition label, location name, observation time (glassmorphism styling)
+- [ ] T026 [P] Create `src/components/WeatherStats.jsx` component: displays humidity, wind speed + direction, visibility in a horizontal row (glassmorphism styling)
+- [ ] T027 [P] Create `src/components/LocationPicker.jsx` component: renders list of disambiguated locations; `onSelect(location)` callback on click; keyboard navigable (arrow keys, Enter, Tab)
+- [ ] T028 Create `src/App.jsx` root component wiring: `useWeather` hook, `useRecentSearches` hook, render SearchBar → LoadingSpinner | ErrorMessage | (WeatherCard + WeatherStats) | LocationPicker
+- [ ] T029 [P] Update `src/components/SearchBar.jsx` to validate empty input (do nothing if empty, show tooltip or brief message)
+
+### Testing for User Story 1 (TDD — write tests FIRST)
+
+- [ ] T030 [P] Create `tests/unit/wmoConditions.test.js`: verify all 27 WMO codes return valid label + icon (IMPLEMENTED, now PASS the tests)
+- [ ] T031 [P] Create `tests/unit/unitConversions.test.js`: verify all conversion functions with known values (IMPLEMENTED, now PASS the tests)
+- [ ] T032 Create integration test `tests/integration/SearchBar.test.jsx`: user types "Chicago", submits, mocked geocoding returns 1 result, mocked weather returns data, `WeatherCard` renders temperature and condition
+- [ ] T033 Create integration test `tests/integration/App.test.jsx` (failure path): user searches "InvalidXYZ", mocked geocoding returns 0 results, `ErrorMessage` is rendered with "location not found" text
+- [ ] T034 Create integration test `tests/integration/App.test.jsx` (API failure path): mocked geocoding API throws error (HTTP 503), `ErrorMessage` is rendered with an error message and user can try again
+
+### Final touches for User Story 1
+
+- [ ] T035 Verify `npm test` passes all tests for US1
+- [ ] T036 Manual QA: Open browser, search for a real city, verify all required fields (temp, feels-like, condition, humidity, wind, visibility) are displayed correctly
+- [ ] T037 Manual QA: Search for invalid location, verify error message is displayed
+
+**Checkpoint**: User Story 1 is complete and independently testable. PM can approve and demo this as MVP.
+
+---
+
+## Phase 4: User Story 2 - Auto-Detect Current Location (Priority: P2)
+
+**Goal**: User clicks "Use My Location" button and weather is automatically displayed for their current position.
+
+**Independent Test**: On a device with location services, click "Use My Location", verify weather appears for detected location.
+
+### Implementation for User Story 2
+
+- [ ] T038 Update `src/components/SearchBar.jsx`: add "Use My Location" button that calls `onUseMyLocation()` prop; show geolocation state (loading/error in button text or nearby message)
+- [ ] T039 Update `src/hooks/useWeather.js`: add `requestGeolocation()` method that calls `useGeolocation()` hook to get coords, then directly fetches weather (bypassing geocoding); handle geolocation errors gracefully
+- [ ] T040 Update `src/App.jsx`: wire SearchBar's `onUseMyLocation()` to call `useWeather.requestGeolocation()`, handle geolocation error states
+
+### Testing for User Story 2
+
+- [ ] T041 Create integration test `tests/integration/App.test.jsx`: mock `navigator.geolocation` to return valid coords, click "Use My Location", verify weather is displayed
+- [ ] T042 Create integration test `tests/integration/App.test.jsx`: mock `navigator.geolocation` to deny permission, click "Use My Location", verify geolocation error message is displayed
+- [ ] T043 Create test for older browser (geolocation unavailable): mock `navigator.geolocation` as undefined, verify friendly message is shown
+
+### Final touches for User Story 2
+
+- [ ] T044 Manual QA: On a real device (or Chrome dev tools location spoofing), click "Use My Location", verify weather for current location appears
+
+**Checkpoint**: User Story 2 is complete. Both US1 and US2 work independently.
+
+---
+
+## Phase 5: User Story 3 - Switch Between Imperial and Metric Units (Priority: P3)
+
+**Goal**: Users can toggle between °F/mph and °C/km/h; preference is remembered for the session.
+
+**Independent Test**: Load weather, click metric toggle, verify all values convert (° C, km/h, km for visibility) and re-display in <1s with no network call.
+
+### Implementation for User Story 3
+
+- [ ] T045 [P] Create `src/components/UnitToggle.jsx` component: toggle between "°F" and "°C"; `unit` prop and `onToggle()` callback
+- [ ] T046 Update `src/hooks/useWeather.js`: implement `toggleUnits()` method that re-fetches weather with opposite temperature_unit/wind_speed_unit params; convert visibility server-side response
+- [ ] T047 Update `src/hooks/useRecentSearches.js` to also write/read `sessionStorage` key `"weatherapp.unitPreference"` with value `"imperial"` or `"metric"` (default: `"imperial"`)
+- [ ] T048 Update `src/App.jsx`: manage `unitPreference` state, pass to `useWeather` hook, render `UnitToggle` in header, call `toggleUnits()` on unit toggle click
+- [ ] T049 Update `src/components/WeatherCard.jsx` and `WeatherStats.jsx`: accept `unit` prop and format display strings with correct units (e.g., pass `"45°F"` or `"7°C"` as display string, not raw values)
+- [ ] T050 Update `src/services/weather.js`: accept `unit` parameter and pass as `temperature_unit` and `wind_speed_unit` query params to Open-Meteo API
+
+### Testing for User Story 3
+
+- [ ] T051 Create integration test `tests/integration/App.test.jsx`: load weather in imperial, click metric toggle, verify all values convert correctly and display with metric units
+- [ ] T052 Create integration test `tests/integration/App.test.jsx`: toggle unit twice, verify it returns to original state (roundtrip conversion)
+- [ ] T053 Create integration test: search for new location after toggling to metric, verify new weather also displays in metric (unit preference persists)
+- [ ] T054 Create test: reload page after toggling to metric, verify metric is still active (sessionStorage persistence)
+
+### Final touches for User Story 3
+
+- [ ] T055 Manual QA: Load weather, toggle to metric, verify all numeric values convert and units change (°C, km/h, km)
+- [ ] T056 Manual QA: Toggle back to imperial, verify conversion is accurate
+- [ ] T057 Manual QA: Refresh page, verify unit preference is remembered
+
+**Checkpoint**: User Stories 1, 2, and 3 all work independently.
+
+---
+
+## Phase 6: User Story 4 - View Recently Searched Locations (Priority: P4)
+
+**Goal**: Users see up to 5 recent search shortcuts below the search bar; clicking one loads that location's weather immediately.
+
+**Independent Test**: Search for 3 cities, verify all 3 appear as chips/pills below SearchBar, click one, verify weather loads without additional search.
+
+### Implementation for User Story 4
+
+- [ ] T058 Create `src/components/RecentSearches.jsx` component: renders horizontal row of pill/chip buttons; each has `onClick` handler; hidden when list is empty
+- [ ] T059 Update `src/hooks/useRecentSearches.js`: implement `addSearch(location)` to append location to sessionStorage list, drop oldest if >5 entries, handle duplicates (move to front, update timestamp)
+- [ ] T060 Update `src/hooks/useWeather.js`: after successful weather fetch, call `addSearch(selectedLocation)` to record in recent searches
+- [ ] T061 Update `src/App.jsx`: pass `recentSearches` from hook to `RecentSearches` component; wire `onSelect` to call `useWeather.selectLocation()` for direct weather fetch
+- [ ] T062 Update `src/components/RecentSearches.jsx`: each chip is a `<button>` with `aria-label="Show weather for {displayName}"`
+
+### Testing for User Story 4
+
+- [ ] T063 Create integration test `tests/integration/App.test.jsx`: search for city A, search for city B, search for city C, verify all 3 appear in recent searches list
+- [ ] T064 Create test: search for city A, click in recent searches, verify weather loads immediately without a new search request
+- [ ] T065 Create test: search for 6 different cities, verify only 5 most recent are shown (oldest drops off)
+- [ ] T066 Create test: search for same city twice, verify it appears once in recent (not duplicated) and is at the front
+
+### Final touches for User Story 4
+
+- [ ] T067 Manual QA: Perform several searches, verify recent list populates and updates correctly
+- [ ] T068 Manual QA: Click a recent search, verify weather loads without a new search input
+- [ ] T069 Manual QA: Refresh page, verify recent searches are preserved (sessionStorage persists)
+
+**Checkpoint**: All 4 user stories are complete and independently testable.
+
+---
+
+## Phase 7: Polish & Cross-Cutting Concerns
+
+**Purpose**: Accessibility, responsive design, documentation, and final validation
+
+- [ ] T070 [P] Accessibility audit: verify all interactive elements are keyboard navigable (Tab, Enter, Space, Arrow keys)
+- [ ] T071 [P] Accessibility audit: verify all non-decorative icons have `alt` text or `aria-label`
+- [ ] T072 [P] Accessibility audit: verify color contrast ratios meet WCAG 2.1 AA (minimum 4.5:1 for normal text) — run automated tool or manual check
+- [ ] T073 [P] Accessibility audit: test with screen reader (NVDA or JAWS) to verify landmark structure and button/link labels
+- [ ] T074 Mobile responsiveness: test on viewport sizes 320px (phone), 768px (tablet), 1920px (desktop widescreen) — verify layout adapts correctly
+- [ ] T075 Test geolocation behavior on mobile device (iOS/Android) — verify permission flow works
+- [ ] T076 Update `README.md` in repository root: add "Installation", "Running Locally", "Testing", "Building" sections with commands from quickstart.md
+- [ ] T077 Verify `npm run build` produces valid `dist/` output with no errors
+- [ ] T078 Create `.gitignore` entries for `dist/`, `.vite/`, `node_modules/`, `.env*`
+- [ ] T079 Run full test suite: `npm test` passes all unit + integration tests
+- [ ] T080 Performance check: verify 5s target for weather display on broadband (use Chrome DevTools Network throttling)
+- [ ] T081 Cross-browser test: verify app works on Chrome, Firefox, Safari, Edge (latest versions)
+- [ ] T082 Final code review: check for console errors/warnings, unused imports, code style consistency
+- [ ] T083 Validate with quickstart.md: fresh clone, `npm install`, `npm run dev`, test all core flows (search, geolocation, unit toggle, recent searches)
+
+**Checkpoint**: Feature complete, tested, documented, and ready for production.
+
+---
+
+## Dependencies & Parallel Opportunities
+
+### Phase Dependencies
+
+| Phase | Depends On | When Can It Start |
+|-------|-----------|-------------------|
+| Phase 1 (Setup) | Nothing | Immediately |
+| Phase 2 (Foundational) | Phase 1 complete | After Setup done |
+| Phase 3 (US1) | Phase 2 complete | After Foundational done |
+| Phase 4 (US2) | Phase 2 complete | After Foundational done (can start in parallel with US1 if staffed) |
+| Phase 5 (US3) | Phase 2 complete | After Foundational done (can start after US1 is mostly complete) |
+| Phase 6 (US4) | Phase 2 complete | After Foundational done (can start after US1 is mostly complete) |
+| Phase 7 (Polish) | All stories complete | After Phases 3–6 done |
+
+### User Story Independence
+
+Once Phase 2 (Foundational) is complete:
+- **US1 (P1)** and **US2 (P2)** can be developed in parallel by different developers
+- **US3 (P3)** and **US4 (P4)** can start once US1 has basic structure, as they only add to or integrate with US1
+- Each story is independently testable and can be demoed separately
+
+### Within-Phase Parallelization Examples
+
+**Phase 1 (Setup)**:
+```
+T002, T003, T004, T005, T006, T010 can run in parallel (different npm tasks, config files)
+```
+
+**Phase 2 (Foundational)**:
+```
+T012, T013, T014, T015 (WMO + unit conversion) can run in parallel
+T017, T018 (service modules) can run in parallel
+T019, T020, T021 (hooks) can run in parallel after services are done
+```
+
+**Phase 3 (US1 Components)**:
+```
+T022, T023, T024, T025, T026, T027 can run in parallel (different components)
+```
+
+**Phase 7 (Polish)**:
+```
+T070, T071, T072, T073, T074, T075 (accessibility + responsive) can run in parallel
+T079 (tests) must wait for implementation to be complete
+```
+
+---
+
+## MVP Scope
+
+The minimal viable product is **Phase 1 + Phase 2 + Phase 3 (User Story 1 only)**:
+
+1. ✅ Users can type a city name
+2. ✅ Users see current weather (temperature, feels-like, condition, humidity, wind, visibility)
+3. ✅ Users get error messages for invalid locations
+4. ✅ Works on desktop and mobile (responsive)
+5. ✅ Accessible (keyboard nav, WCAG 2.1 AA)
+
+All other user stories (geolocation, unit toggle, recent searches) are valuable enhancements.
+
+---
+
+## Implementation Strategy
+
+### Option A: Sequential (Single Developer)
+
+1. Phases 1 → 2 → 3 → 4 → 5 → 6 → 7
+2. Estimated: 3–4 weeks, one feature at a time
+3. Advantage: Simple linear flow
+4. Disadvantage: Slower time-to-MVP
+
+### Option B: Parallel Stories (Multiple Developers)
+
+1. One person: Phase 1 + 2 (shared foundation)
+2. Parallel (once Phase 2 done):
+   - Developer A: Phase 3 (US1)
+   - Developer B: Phase 4 (US2) or Phase 5 (US3)
+3. Once US1 passes QA, remaining stories integrate
+4. Phase 7 (Polish) is done together
+5. Estimated: 1.5–2 weeks, all stories built incrementally
+
+### Option C: MVP-First (Delivery Focus)
+
+1. Complete Phases 1 + 2 + 3 → Deploy/Demo MVP
+2. Gather feedback
+3. Complete Phases 4 + 5 + 6 → Enhance and re-deploy
+4. Complete Phase 7 → Final polish and release
+5. Estimated: 1 week for MVP, +1 week for full feature
