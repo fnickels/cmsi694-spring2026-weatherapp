@@ -95,9 +95,9 @@ GET https://api.open-meteo.com/v1/forecast
 
 ### Unit toggle architecture
 
-**Decision**: Unit toggle re-fetches weather with different query parameters. This is simpler than storing raw values and converting client-side, and ensures unit labels (from `current_units`) stay consistent with values.  
-**Rationale**: Eliminates a class of conversion bugs. SC-004 allows up to 1 second for the toggle, which is achievable with a repeat API call to a fast CDN-served API.  
-**Alternative considered**: Store raw metric values and convert in `unitConversions.js`. Rejected because visibility does not come from the API in a consistent unit — client-side conversion is already required for visibility regardless, making the "pure conversion" approach inconsistent.
+**Decision**: Unit toggle performs client-side conversion only, with no additional network request after weather data is loaded. Weather values are normalized to metric in state (`temperatureC`, `feelsLikeC`, `windSpeedKph`, `visibilityM`) and formatted for display based on `UnitPreference`.  
+**Rationale**: This directly satisfies SC-004 (toggle in under 1 second with no network request) and provides deterministic behavior offline after data has been fetched once.  
+**Alternative considered**: Re-fetch weather with different query parameters on each toggle. Rejected because it violates SC-004's explicit no-network-request requirement and introduces avoidable latency variability.
 
 ---
 

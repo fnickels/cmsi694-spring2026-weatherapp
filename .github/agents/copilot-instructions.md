@@ -23,6 +23,8 @@ npm test && npm run lint
 JavaScript (ES2022+) — React 18, Node 20 (dev tooling only): Follow standard conventions
 
 ## Recent Changes
+- 001-location-weather-app: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
+- 001-location-weather-app: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 
 - 001-location-weather-app: Added JavaScript (ES2022+) — React 18, Node 20 (dev tooling only) + React 18, Vite 5, Tailwind CSS 3, Open-Meteo REST API (no key required)
 

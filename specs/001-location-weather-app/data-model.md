@@ -165,7 +165,7 @@ Geocoding returns 2+     isLoading=false, disambiguationList=[Location...]
 User picks from list     isLoading=true (weather fetch begins)
 Weather fetch succeeds   isLoading=false, currentWeather=CurrentWeather, add to recentSearches
 Weather fetch fails      isLoading=false, error="Could not load weather data..."
-Unit toggle clicked      unitPreference toggled, re-fetch weather with new unit params
+Unit toggle clicked      unitPreference toggled, recompute display values locally (no network request)
 "Use My Location" click  isLoading=true, geolocation requested
 Geolocation permitted    isLoading=true (weather fetch begins with coords)
 Geolocation denied       isLoading=false, error=null, geoError="Location permission denied..."
