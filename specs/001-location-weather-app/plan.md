@@ -104,3 +104,21 @@ package.json
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|--------------------------------------|
 | No owned backend server (violates "backend service endpoint" in Technical Baseline) | Open-Meteo is a keyless, CORS-enabled public API — no backend proxy is needed to secure it. Adding a proxy server with no credentials to hide provides zero security benefit and introduces Node.js server complexity, a second process to run, and additional failure points for a course demo. | A backend proxy would proxy a public, keyless API over localhost — this adds operational complexity with no security, reliability, or functional gain. |
+
+## Post-Design Constitution Check
+
+Re-checked after Phase 1 artifacts (`research.md`, `data-model.md`, `contracts/`, `quickstart.md`) finalized.
+
+| Principle | Status | Notes |
+|-----------|--------|-------|
+| I. Dynamic User Experience | ✅ PASS | Design uses live weather and geocoding APIs; responsive UI feedback states defined |
+| II. Secure by Default | ✅ PASS (justified exception) | No secrets in code; backend endpoint exception remains documented in Complexity Tracking |
+| III. Accessibility and Performance Baseline | ✅ PASS | WCAG 2.1 AA requirements and performance targets represented in contracts and design |
+| IV. Testable Core Flows | ✅ PASS | Happy-path and failure-path test strategy documented; traceable to tasks |
+| V. Operability and Simplicity | ✅ PASS | Local setup and build/test commands documented; no complex infrastructure required |
+| Technical Baseline — frontend interface | ✅ PASS | React SPA with full interactive UI and responsive design |
+| Technical Baseline — backend service endpoint | ⚠️ EXCEPTION (justified) | Keyless external API negates need for backend; exception documented above |
+| Technical Baseline — config in env vars | ✅ PASS | No secrets to store; no .env file required |
+| Technical Baseline — repeatable local setup | ✅ PASS | Quickstart.md + README provide complete setup path |
+
+**Conclusion**: Plan passes all constitutional gates with one justified exception. Ready to proceed to task generation.
