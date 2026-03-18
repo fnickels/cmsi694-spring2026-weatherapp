@@ -181,10 +181,15 @@ GET https://api.open-meteo.com/v1/forecast
 **Failure-path (required)**:
 - `App.test.jsx`: Geocoding mock returns HTTP 503 → `ErrorMessage` is rendered with appropriate message
 - `App.test.jsx`: Geocoding mock returns empty `results` → "location not found" message rendered
+- `App.test.jsx`: Geocoding or weather endpoint returns malformed JSON/shape → graceful service-unavailable message rendered
+- `App.test.jsx`: Geocoding returns multiple results → disambiguation list shown; selecting one loads weather
 
 **Unit tests**:
 - `unitConversions.test.js`: °C↔°F, km/h↔mph, m→km, m→miles
 - `wmoConditions.test.js`: All 27 WMO codes return a non-null label and icon ID
+
+**Unit-toggle assertion**:
+- Integration tests MUST assert that toggling units does not issue an additional network request (spy on `fetch` call count).
 
 ---
 

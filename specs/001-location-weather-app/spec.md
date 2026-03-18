@@ -79,6 +79,8 @@ A returning visitor or a user who has already searched for a location during the
 - What happens when a location name contains special characters or is entered in a non-English script? — Input should be handled gracefully; best-effort search is attempted.
 - What happens when the user's device has very slow connectivity? — A loading indicator is shown, and the page remains usable while weather data is being fetched.
 - What happens if geolocation returns coordinates in a remote area with no named city? — The nearest available location name is used, clearly labeled as approximate.
+- What happens when API requests exceed an acceptable wait time? — Requests timeout after 8 seconds and show a service-unavailable message with retry guidance.
+- What happens when the device is offline or loses connectivity during a request? — The app shows a network-specific error message and recommends retrying when online.
 
 ## Requirements *(mandatory)*
 
@@ -88,10 +90,10 @@ A returning visitor or a user who has already searched for a location during the
 - **FR-002**: System MUST display the following weather facts for any successfully retrieved location: current temperature, "feels-like" temperature, weather condition label (e.g., "Partly Cloudy"), humidity percentage, wind speed and direction (displayed as cardinal or intercardinal labels: N, NE, E, SE, S, SW, W, NW), and visibility.
 - **FR-003**: System MUST display a visual weather condition indicator (icon or illustration) that represents the current condition (e.g., sun, clouds, rain).
 - **FR-004**: System MUST display the resolved location name and the date and time of the weather observation for context.
-- **FR-005**: System MUST provide a "Use My Location" button that triggers browser geolocation to auto-populate weather for the user's current position.
+- **FR-005**: System MUST provide a "Use My Location" button that triggers browser geolocation to auto-populate weather for the user's current position. For auto-detected locations, the system SHOULD show a human-readable label derived from timezone data or fall back to "Your Location" if city naming is unavailable.
 - **FR-006**: Users MUST be able to toggle between imperial units (°F, mph) and metric units (°C, km/h), with all displayed weather values updating immediately.
 - **FR-007**: System MUST present a disambiguation list when a location name matches multiple places, allowing the user to select the intended one.
-- **FR-008**: System MUST display a clear, user-friendly error message when a location cannot be found or weather data cannot be retrieved.
+- **FR-008**: System MUST display clear, user-friendly error messages and distinguish at minimum these cases: location not found (empty geocoding results), service unavailable (5xx/timeout/network failure), and geolocation permission denied.
 - **FR-009**: System MUST show a loading indicator while weather data is being fetched.
 - **FR-010**: System MUST retain up to 5 recently searched locations within the current session and display them as quick-access shortcuts near the search field.
 - **FR-011**: The site MUST be fully usable on desktop, tablet, and mobile screen sizes with a responsive, modern visual design, built using React (Vite) and Tailwind CSS.
@@ -141,4 +143,5 @@ A returning visitor or a user who has already searched for a location during the
 - Performance targets assume a standard broadband connection; offline or very low bandwidth scenarios are not a primary concern for this project.
 - The unit preference defaults to imperial (°F) and can be toggled by the user; locale-based auto-detection is a nice-to-have, not a hard requirement.
 - Recent searches are stored only for the current browser session; no server-side persistence of search history is required.
+- Automatic retry/backoff for failed API requests is out of scope; users retry through existing UI actions.
 - The deployment target is **local development only** (`npm run dev`). No hosting configuration, CI/CD pipeline, or public URL is required. The Vite build toolchain (`npm run build`) is expected to produce a valid production bundle, but deploying it is out of scope for this project.

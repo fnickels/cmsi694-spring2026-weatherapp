@@ -75,6 +75,11 @@ GET https://geocoding-api.open-meteo.com/v1/search?name=Chicago&count=10&languag
 HTTP 5xx or network failure — no structured error body guaranteed.  
 Application MUST catch fetch errors and display FR-008 error message.
 
+### Client timeout guidance
+
+- Client requests SHOULD use an 8-second timeout budget (AbortController) for both geocoding and weather calls.
+- Timeout failures MUST be mapped to the service-unavailable error state (not location-not-found).
+
 ---
 
 ## API 2: Current Weather — Fetch by Coordinates
@@ -167,6 +172,12 @@ HTTP 4xx/5xx — may return structured error:
 ```
 
 Application MUST check `response.ok` and display FR-008 error message on any failure.
+
+### Error-state mapping
+
+- Geocoding returns missing/empty `results`: map to location-not-found state.
+- HTTP 4xx/5xx or network/timeout failures: map to service-unavailable state.
+- Geolocation permission denial/unavailable API: map to geolocation-specific guidance state.
 
 ---
 

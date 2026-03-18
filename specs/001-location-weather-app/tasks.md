@@ -81,6 +81,8 @@ This project will be built incrementally. Each user story is independently testa
 - [ ] T032 Create integration test `tests/integration/SearchBar.test.jsx`: user types "Chicago", submits, mocked geocoding returns 1 result, mocked weather returns data, `WeatherCard` renders temperature and condition
 - [ ] T033 Create integration test `tests/integration/App.test.jsx` (failure path): user searches "InvalidXYZ", mocked geocoding returns 0 results, `ErrorMessage` is rendered with "location not found" text
 - [ ] T034 Create integration test `tests/integration/App.test.jsx` (API failure path): mocked geocoding API throws error (HTTP 503), `ErrorMessage` is rendered with an error message and user can try again
+- [ ] T087 Create integration test `tests/integration/App.test.jsx` (disambiguation path): mocked geocoding returns 2+ locations, user selects one, weather loads for selected location
+- [ ] T088 Create integration test `tests/integration/App.test.jsx` (malformed response path): mocked geocoding/weather returns invalid JSON shape, app shows service-unavailable error state
 
 ### Final touches for User Story 1
 
@@ -139,6 +141,7 @@ This project will be built incrementally. Each user story is independently testa
 - [ ] T052 Create integration test `tests/integration/App.test.jsx`: toggle unit twice, verify it returns to original state (roundtrip conversion)
 - [ ] T053 Create integration test: search for new location after toggling to metric, verify new weather also displays in metric (unit preference persists)
 - [ ] T054 Create test: reload page after toggling to metric, verify metric is still active (sessionStorage persistence)
+- [ ] T089 Create integration assertion for SC-004: spy on `fetch` during unit toggle and verify no additional network request is made
 
 ### Final touches for User Story 3
 
@@ -202,6 +205,7 @@ This project will be built incrementally. Each user story is independently testa
 - [ ] T084 Create integration test `tests/integration/LocationSearch.test.jsx`: query 20 real valid locations via Open-Meteo Geocoding API (e.g., "New York", "London", "Tokyo") to verify SC-003 (95% success rate achieved with real data)
 - [ ] T085 Create performance test `tests/integration/Geolocation.perf.test.jsx`: mock geolocation with mocked weather API and measure time from "Use My Location" click to weather display; verify completes within 8 seconds per SC-007
 - [ ] T086 Add SC-006 UX validation: confirm search field label text is exactly "Enter location or city name", appears above the fold at 320px/768px/1920px, and is visually dominant as the first actionable control on initial load (capture screenshot evidence)
+- [ ] T090 Validate geolocation runtime requirements: confirm HTTPS/localhost requirement is documented and geolocation error messaging covers insecure-context/unavailable API cases
 
 **Checkpoint**: Feature complete, tested, documented, and ready for production.
 
