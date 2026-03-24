@@ -8,6 +8,8 @@ import { useState, useCallback } from 'react'
 import { reverseGeocodeLocation, searchLocations } from '../services/geocoding'
 import { fetchWeather } from '../services/weather'
 
+const GEOLOCATION_TIMEOUT_MS = 5000
+
 export function useWeather() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -128,12 +130,16 @@ export function useWeather() {
       (geoError) => {
         if (geoError.code === geoError.PERMISSION_DENIED) {
           setError('Please enable location access in your browser settings')
+        } else if (geoError.code === geoError.POSITION_UNAVAILABLE) {
+          setError('Location information is unavailable. Try searching instead.')
+        } else if (geoError.code === geoError.TIMEOUT) {
+          setError('Geolocation request timed out. Please try again.')
         } else {
           setError('Could not determine your location. Try searching by city name.')
         }
         setIsLoading(false)
       },
-      { timeout: 8000, enableHighAccuracy: true }
+      { timeout: GEOLOCATION_TIMEOUT_MS, enableHighAccuracy: true }
     )
   }, [buildDetectedLocation])
 

@@ -107,4 +107,32 @@ test.describe('Core weather app flows', () => {
     await page.getByRole('button', { name: 'Clear recent' }).click()
     await expect(chip).toHaveCount(0)
   })
+
+  test('geolocation denial after Use My Location keeps manual search usable', async ({ page }) => {
+    await mockApis(page)
+
+    await page.addInitScript(() => {
+      Object.defineProperty(Navigator.prototype, 'geolocation', {
+        configurable: true,
+        get() {
+          return {
+            getCurrentPosition: (_success, error) => {
+              error({ code: 1, PERMISSION_DENIED: 1, message: 'Denied' })
+            },
+          }
+        },
+      })
+    })
+
+    await page.goto('/')
+
+    await page.getByRole('button', { name: /use my location/i }).click()
+
+    await expect(page.getByRole('alert')).toContainText(/enable location access/i)
+    await expect(page.getByLabel('Location search')).toBeEnabled()
+
+    await page.getByLabel('Location search').fill('Los Angeles')
+    await page.getByRole('button', { name: 'Search' }).click()
+    await expect(page.getByLabel('Current weather')).toContainText('Los Angeles')
+  })
 })

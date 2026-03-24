@@ -1,24 +1,86 @@
 /**
- * locationState utility
- * Factory for InitialVisitContext — the state shape used by useInitialLocation.
- * Session-scoped: resets on every page refresh (no persistence).
+ * Shared state primitives for first-load geolocation orchestration.
  */
+
+export const INITIAL_GEOLOCATION_TIMEOUT_MS = 5000
+
+export const LOCATION_ERROR_TYPES = {
+  DENIED: 'denied',
+  TIMEOUT: 'timeout',
+  UNAVAILABLE: 'unavailable',
+  UNKNOWN: 'unknown',
+}
 
 /**
  * Create a fresh InitialVisitContext with all flags at their initial values.
- * @param {Object} overrides - optional partial overrides for testing / pre-seeding
- * @returns {Object} InitialVisitContext
+ * @param {Object} overrides optional partial overrides for testing / pre-seeding
  */
 export function createInitialVisitContext(overrides = {}) {
   return {
-    attempted: false,        // true once geolocation was requested
-    granted: false,          // true when permission allowed and coords received
-    denied: false,           // true when user denied permission (code 1)
-    timedOut: false,         // true when no response after 8s
-    unavailable: false,      // true when browser doesn't support geolocation
-    userManuallySelected: false, // true once user explicitly searches / selects
-    coordinates: null,       // { latitude, longitude } | null
-    error: null,             // 'denied' | 'timeout' | 'unavailable' | 'unknown' | null
+    attempted: false,
+    granted: false,
+    denied: false,
+    timedOut: false,
+    unavailable: false,
+    userManuallySelected: false,
+    coordinates: null,
+    error: null,
     ...overrides,
+  }
+}
+
+/**
+ * Apply a standardized status transition to InitialVisitContext.
+ * @param {Object} state current context
+ * @param {string} status one of: attempted, granted, denied, timeout, unavailable, failed, manual
+ * @param {Object} payload optional transition data
+ */
+export function transitionInitialVisitContext(state, status, payload = {}) {
+  switch (status) {
+    case 'attempted':
+      return {
+        ...state,
+        attempted: true,
+      }
+    case 'granted':
+      return {
+        ...state,
+        granted: true,
+        denied: false,
+        timedOut: false,
+        unavailable: false,
+        error: null,
+        coordinates: payload.coordinates ?? state.coordinates,
+      }
+    case 'denied':
+      return {
+        ...state,
+        denied: true,
+        error: LOCATION_ERROR_TYPES.DENIED,
+      }
+    case 'timeout':
+      return {
+        ...state,
+        timedOut: true,
+        error: LOCATION_ERROR_TYPES.TIMEOUT,
+      }
+    case 'unavailable':
+      return {
+        ...state,
+        unavailable: true,
+        error: LOCATION_ERROR_TYPES.UNAVAILABLE,
+      }
+    case 'failed':
+      return {
+        ...state,
+        error: payload.error ?? LOCATION_ERROR_TYPES.UNKNOWN,
+      }
+    case 'manual':
+      return {
+        ...state,
+        userManuallySelected: true,
+      }
+    default:
+      return state
   }
 }

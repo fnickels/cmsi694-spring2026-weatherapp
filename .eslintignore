@@ -1,0 +1,27 @@
+# Build outputs
+dist/
+build/
+.vite/
+
+# Dependencies
+node_modules/
+vendor/
+
+# Generated files
+coverage/
+.nyc_output/
+
+# Environment
+.env
+.env.local
+.env*.local
+
+# Editor/IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Third-party library code that may not conform to eslint rules
+leaflet.js

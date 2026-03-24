@@ -17,7 +17,7 @@ vi.mock('../../src/services/weather', () => ({
   fetchWeather: vi.fn(),
 }))
 
-import { searchLocations } from '../../src/services/geocoding'
+import { searchLocations, reverseGeocodeLocation } from '../../src/services/geocoding'
 import { fetchWeather } from '../../src/services/weather'
 
 const sampleLocation = {
@@ -104,5 +104,96 @@ describe('Fallback when geolocation unavailable (US2, FR-001)', () => {
     // No crash, no error alert, no auto-loaded weather — page loads normally
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     expect(screen.getByLabelText(/location search/i)).toBeInTheDocument()
+  })
+})
+
+describe('Fallback when geolocation times out (US2, FR-005)', () => {
+  let getCurrentPositionMock
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    sessionStorage.clear()
+
+    getCurrentPositionMock = vi.fn((_success, error) => {
+      error({ code: 3, TIMEOUT: 3, message: 'Timeout' })
+    })
+
+    Object.defineProperty(global.navigator, 'geolocation', {
+      configurable: true,
+      value: {
+        getCurrentPosition: getCurrentPositionMock,
+      },
+    })
+  })
+
+  it('shows timeout fallback and requests geolocation with 5-second timeout', async () => {
+    render(<App />)
+
+    expect(await screen.findByText(/location request timed out/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/location search/i)).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: /^search$/i })).not.toBeDisabled()
+
+    expect(getCurrentPositionMock).toHaveBeenCalled()
+    const options = getCurrentPositionMock.mock.calls[0][2]
+    expect(options.timeout).toBe(5000)
+  })
+})
+
+/**
+ * T038 — Integration test: same-session deny → grant via "Use My Location" retry
+ * Spec edge case 1: "Visitor grants location permission after initially denying during the same session"
+ * Covers FR-012 retry semantics
+ */
+describe('Same-session deny then grant via Use My Location (US2, FR-012)', () => {
+  let callCount
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    sessionStorage.clear()
+    callCount = 0
+
+    // First call → deny; subsequent calls → succeed with San Francisco coords
+    Object.defineProperty(global.navigator, 'geolocation', {
+      configurable: true,
+      value: {
+        getCurrentPosition: vi.fn((success, error) => {
+          callCount += 1
+          if (callCount === 1) {
+            error({ code: 1, message: 'User denied Geolocation' })
+          } else {
+            success({ coords: { latitude: 37.77, longitude: -122.41 } })
+          }
+        }),
+      },
+    })
+
+    reverseGeocodeLocation.mockResolvedValue({
+      id: 99,
+      name: 'San Francisco',
+      displayName: 'San Francisco, California, United States',
+      latitude: 37.77,
+      longitude: -122.41,
+      country: 'United States',
+      countryCode: 'US',
+      admin1: 'California',
+      approximate: false,
+    })
+
+    fetchWeather.mockResolvedValue(sampleWeather)
+  })
+
+  it('loads weather when user clicks Use My Location after denial and then grants (FR-012)', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    // Initial denial → notice shown
+    await screen.findByText(/location access was denied/i)
+
+    // User retries via button
+    await user.click(screen.getByRole('button', { name: /use my location/i }))
+
+    // Second geolocation attempt succeeds → weather loads
+    expect(await screen.findByRole('region', { name: /current weather/i })).toBeInTheDocument()
+    expect((await screen.findAllByText(/San Francisco/i)).length).toBeGreaterThan(0)
   })
 })

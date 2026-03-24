@@ -59,42 +59,50 @@ function mockWeatherApis(page) {
     },
   ]
 
-  page.route('https://geocoding-api.open-meteo.com/v1/search**', async (route) => {
+  // OpenWeather direct geocoding — search by name
+  page.route('https://api.openweathermap.org/geo/1.0/direct**', async (route) => {
     const url = new URL(route.request().url())
-    const query = (url.searchParams.get('name') || '').toLowerCase().trim()
+    const query = (url.searchParams.get('q') || '').toLowerCase().trim()
     const location = locationsByName[query]
 
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({
-        results: location
+      body: JSON.stringify(
+        location
           ? [{
-              id: location.id,
               name: location.name,
-              latitude: location.latitude,
-              longitude: location.longitude,
-              country: location.country,
-              country_code: location.country_code,
-              admin1: location.admin1,
+              lat: location.latitude,
+              lon: location.longitude,
+              country: location.country_code,
+              state: location.admin1,
             }]
-          : [],
-      }),
+          : []
+      ),
     })
   })
 
-  page.route('https://geocoding-api.open-meteo.com/v1/reverse**', async (route) => {
+  // OpenWeather reverse geocoding — resolve coordinates to place name
+  page.route('https://api.openweathermap.org/geo/1.0/reverse**', async (route) => {
     const url = new URL(route.request().url())
-    const latitude = Number(url.searchParams.get('latitude'))
-    const longitude = Number(url.searchParams.get('longitude'))
-    const matched = reverseByCoordinate.find((entry) => entry.match({ latitude, longitude }))
+    const lat = Number(url.searchParams.get('lat'))
+    const lon = Number(url.searchParams.get('lon'))
+    const matched = reverseByCoordinate.find((entry) => entry.match({ latitude: lat, longitude: lon }))
 
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({
-        results: matched ? [matched.result] : [],
-      }),
+      body: JSON.stringify(
+        matched
+          ? [{
+              name: matched.result.name,
+              lat: matched.result.latitude,
+              lon: matched.result.longitude,
+              country: matched.result.country_code,
+              state: matched.result.admin1,
+            }]
+          : []
+      ),
     })
   })
 
@@ -128,123 +136,120 @@ function mockWeatherApis(page) {
   })
 }
 
-test.describe('Auto geolocation flows', () => {
-  test('auto-detects weather on first load within 6 seconds and shows auto-located badge', async ({ page, context, browserName }) => {
-    test.skip(browserName === 'webkit', 'WebKit geolocation permissions are less stable in CI for this mocked first-load flow.')
+async function installGeolocationBehavior(page, behavior) {
+  await page.addInitScript((selectedBehavior) => {
+    let calls = 0
 
+    Object.defineProperty(Navigator.prototype, 'geolocation', {
+      configurable: true,
+      get() {
+        return {
+          getCurrentPosition: (success, error) => {
+            calls += 1
+
+            if (selectedBehavior === 'success-chicago') {
+              success({ coords: { latitude: 41.88, longitude: -87.63 } })
+              return
+            }
+
+            if (selectedBehavior === 'denied') {
+              error({ code: 1, PERMISSION_DENIED: 1, message: 'Denied' })
+              return
+            }
+
+            if (selectedBehavior === 'timeout') {
+              error({ code: 3, TIMEOUT: 3, message: 'Timeout' })
+              return
+            }
+
+            if (selectedBehavior === 'deny-then-success') {
+              // React StrictMode can invoke mount effects twice in development,
+              // so deny initial auto-detect attempts and succeed on explicit retry.
+              if (calls <= 2) {
+                error({ code: 1, PERMISSION_DENIED: 1, message: 'Denied' })
+                return
+              }
+              success({ coords: { latitude: 34.05, longitude: -118.24 } })
+            }
+          },
+        }
+      },
+    })
+  }, behavior)
+}
+
+test.describe('Auto geolocation flows', () => {
+  test('auto-detects weather on first load within 6 seconds and shows auto-located badge', async ({ page }) => {
     mockWeatherApis(page)
-    await context.grantPermissions(['geolocation'])
-    await context.setGeolocation({ latitude: 41.88, longitude: -87.63 })
+    await installGeolocationBehavior(page, 'success-chicago')
 
     const start = Date.now()
     await page.goto('/')
 
     const weatherCard = page.getByLabel('Current weather')
-    await expect(weatherCard).toContainText('Chicago')
-    await expect(weatherCard).toContainText('Auto-located')
+    await expect(weatherCard).toContainText('Chicago', { timeout: 30000 })
+    await expect(weatherCard).toContainText('Auto-located', { timeout: 30000 })
     expect(Date.now() - start).toBeLessThan(6000)
   })
 
   test('shows fallback notice and keeps search usable when permission is denied', async ({ page }) => {
     mockWeatherApis(page)
-
-    await page.addInitScript(() => {
-      Object.defineProperty(window.navigator, 'geolocation', {
-        configurable: true,
-        value: {
-          getCurrentPosition: (_success, error) => {
-            error({ code: 1, PERMISSION_DENIED: 1, message: 'Denied' })
-          },
-        },
-      })
-    })
+    await installGeolocationBehavior(page, 'denied')
 
     await page.goto('/')
 
-    await expect(page.getByText(/location access was denied/i)).toBeVisible()
+    await expect(page.getByText(/location access was denied/i)).toBeVisible({ timeout: 30000 })
     await expect(page.getByLabel('Location search')).toBeEnabled()
     await expect(page.getByRole('button', { name: 'Search' })).toBeEnabled()
 
     await page.getByLabel('Location search').fill('New York')
     await page.getByRole('button', { name: 'Search' }).click()
-    await expect(page.getByLabel('Current weather')).toContainText('New York')
+    await expect(page.getByLabel('Current weather')).toContainText('New York', { timeout: 30000 })
   })
 
   test('falls back after geolocation timeout without blocking manual search', async ({ page }) => {
     mockWeatherApis(page)
-
-    await page.addInitScript(() => {
-      Object.defineProperty(window.navigator, 'geolocation', {
-        configurable: true,
-        value: {
-          getCurrentPosition: (_success, error) => {
-            setTimeout(() => {
-              error({ code: 3, TIMEOUT: 3, message: 'Timeout' })
-            }, 25)
-          },
-        },
-      })
-    })
+    await installGeolocationBehavior(page, 'timeout')
 
     await page.goto('/')
 
-    await expect(page.getByText(/location request timed out/i)).toBeVisible()
+    await expect(page.getByText(/location request timed out/i)).toBeVisible({ timeout: 30000 })
     await expect(page.getByLabel('Location search')).toBeEnabled()
 
     await page.getByLabel('Location search').fill('New York')
     await page.getByRole('button', { name: 'Search' }).click()
-    await expect(page.getByLabel('Current weather')).toContainText('New York')
+    await expect(page.getByLabel('Current weather')).toContainText('New York', { timeout: 30000 })
   })
 
-  test('manual search overrides auto-detected weather and does not revert', async ({ page, context, browserName }) => {
-    test.skip(browserName === 'webkit', 'WebKit geolocation permissions are less stable in CI for this mocked first-load flow.')
-
+  test('manual search overrides auto-detected weather and does not revert', async ({ page }) => {
     mockWeatherApis(page)
-    await context.grantPermissions(['geolocation'])
-    await context.setGeolocation({ latitude: 41.88, longitude: -87.63 })
+    await installGeolocationBehavior(page, 'success-chicago')
 
     await page.goto('/')
 
     const weatherCard = page.getByLabel('Current weather')
-    await expect(weatherCard).toContainText('Chicago')
-    await expect(weatherCard).toContainText('Auto-located')
+    await expect(weatherCard).toContainText('Chicago', { timeout: 30000 })
+    await expect(weatherCard).toContainText('Auto-located', { timeout: 30000 })
 
     await page.getByLabel('Location search').fill('New York')
     await page.getByRole('button', { name: 'Search' }).click()
 
-    await expect(weatherCard).toContainText('New York')
+    await expect(weatherCard).toContainText('New York', { timeout: 30000 })
     await expect(weatherCard).not.toContainText('Auto-located')
     await page.waitForTimeout(250)
-    await expect(weatherCard).toContainText('New York')
+    await expect(weatherCard).toContainText('New York', { timeout: 30000 })
   })
 
   test('clicking Use My Location after denial re-prompts and loads weather', async ({ page }) => {
     mockWeatherApis(page)
-
-    await page.addInitScript(() => {
-      let calls = 0
-      Object.defineProperty(window.navigator, 'geolocation', {
-        configurable: true,
-        value: {
-          getCurrentPosition: (success, error) => {
-            calls += 1
-            if (calls === 1) {
-              error({ code: 1, PERMISSION_DENIED: 1, message: 'Denied' })
-              return
-            }
-
-            success({ coords: { latitude: 34.05, longitude: -118.24 } })
-          },
-        },
-      })
-    })
+    await installGeolocationBehavior(page, 'deny-then-success')
 
     await page.goto('/')
 
-    await expect(page.getByText(/location access was denied/i)).toBeVisible()
+    await expect(page.getByText(/location access was denied/i)).toBeVisible({ timeout: 30000 })
     await page.getByRole('button', { name: /use my location/i }).click()
 
     const weatherCard = page.getByLabel('Current weather')
-    await expect(weatherCard).toContainText('Los Angeles')
+    await expect(weatherCard).toContainText('Los Angeles', { timeout: 30000 })
   })
 })

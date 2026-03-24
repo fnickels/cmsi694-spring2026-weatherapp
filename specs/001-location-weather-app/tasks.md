@@ -11,7 +11,7 @@ This project will be built incrementally. Each user story is independently testa
 
 **Tech Stack**: React 18 + Vite 5 + Tailwind CSS 3 + Vitest + Testing Library  
 **Testing**: Vitest + @testing-library/react + @testing-library/user-event + jsdom  
-**APIs**: Open-Meteo (geocoding + weather, no API key)  
+**APIs**: OpenWeather Geocoding API + Open-Meteo Weather API  
 **Storage**: `sessionStorage` for unit preference + recent searches
 
 ---
@@ -47,7 +47,7 @@ This project will be built incrementally. Each user story is independently testa
 - [x] T014 [P] Create unit tests `tests/unit/wmoConditions.test.js` covering all 27 codes (WRITE TESTS FIRST, expect to fail)
 - [x] T015 [P] Create unit tests `tests/unit/unitConversions.test.js` covering all conversion functions with edge cases (WRITE TESTS FIRST, expect to fail)
 - [x] T016 Extend `src/index.css` with dark glassmorphism theme styles (dark gradient background, CSS variables, and utility class refinements) after Tailwind directives are in place
-- [x] T017 [P] Create `src/services/geocoding.js` with `searchLocations(query)` function calling Open-Meteo Geocoding API (see contracts/api-open-meteo.md)
+- [x] T017 [P] Create `src/services/geocoding.js` with `searchLocations(query)` and `reverseGeocodeLocation(latitude, longitude)` functions calling OpenWeather geocoding endpoints (see contracts/api-providers.md)
 - [x] T018 [P] Create `src/services/weather.js` with `fetchWeather(latitude, longitude, unit)` function calling Open-Meteo Weather API
 - [x] T019 Create `src/hooks/useWeather.js` hook that orchestrates: search → geocode → weather fetch; exposes `{ isLoading, error, currentWeather, selectedLocation, disambiguationList, search(query), selectLocation(location) }` (see data-model.md)
 - [x] T020 Create `src/hooks/useGeolocation.js` hook that wraps `navigator.geolocation.getCurrentPosition()`; exposes `{ latitude, longitude, error, isLoading, requestLocation() }` (see research.md §7)
@@ -108,16 +108,16 @@ This project will be built incrementally. Each user story is independently testa
 ### Implementation for User Story 2
 
 - [x] T038 Update `src/components/SearchBar.jsx`: refine existing "Use My Location" button behavior to show geolocation loading/error states (button text, disabled state, and accessible status messaging)
-- [x] T039 Update `src/hooks/useWeather.js`: add `requestGeolocation()` method that calls `useGeolocation()` hook to get coords, then directly fetches weather (bypassing geocoding); handle geolocation errors gracefully
+- [x] T039 Update `src/hooks/useWeather.js`: add `requestGeolocation()` method that gets coords, attempts OpenWeather reverse geocoding for the nearest place label, then fetches weather; handle geolocation and reverse-geocoding errors gracefully
 - [x] T040 Update `src/App.jsx`: wire SearchBar's `onUseMyLocation()` to call `useWeather.requestGeolocation()`, handle geolocation error states
-- [x] T091 Update geolocation rendering flow in `src/hooks/useWeather.js`/`src/App.jsx`: derive a human-readable auto-location label from timezone data and fall back to `"Your Location"` when unavailable
+- [x] T091 Update geolocation rendering flow in `src/hooks/useWeather.js`/`src/App.jsx`: derive a human-readable auto-location label from OpenWeather reverse geocoding and fall back to `Location (approximate)` when unavailable
 
 ### Testing for User Story 2
 
 - [x] T041 Create integration test `tests/integration/App.test.jsx`: mock `navigator.geolocation` to return valid coords, click "Use My Location", verify weather is displayed
 - [x] T042 Create integration test `tests/integration/App.test.jsx`: mock `navigator.geolocation` to deny permission, click "Use My Location", verify geolocation error message is displayed
 - [x] T043 Create test for older browser (geolocation unavailable): mock `navigator.geolocation` as undefined, verify friendly message is shown
-- [x] T092 Create integration test `tests/integration/App.test.jsx`: geolocation success uses timezone-derived label and falls back to `"Your Location"` when label derivation is unavailable
+- [x] T092 Create integration test `tests/integration/App.test.jsx`: geolocation success uses OpenWeather reverse geocoding when available and falls back to `Location (approximate)` when label resolution is unavailable
 
 ### Final touches for User Story 2
 
@@ -209,7 +209,7 @@ This project will be built incrementally. Each user story is independently testa
 - [x] T081 Cross-browser test: verify app works on Chrome, Firefox, Safari, Edge (latest versions)
 - [x] T082 Final code review: check for console errors/warnings, unused imports, code style consistency
 - [x] T083 Validate with quickstart.md: fresh clone, `npm install`, `npm run dev`, test all core flows (search, geolocation, unit toggle, recent searches)
-- [x] T084 Create integration test `tests/integration/LocationSearch.test.jsx`: query 20 real valid locations via Open-Meteo Geocoding API (e.g., "New York", "London", "Tokyo") to verify SC-003 (95% success rate achieved with real data)
+- [x] T084 Create integration test `tests/integration/LocationSearch.test.jsx`: query 20 real valid locations via OpenWeather Geocoding API (e.g., "New York", "London", "Tokyo") to verify SC-003 (95% success rate achieved with real data when a valid API key is configured)
 - [x] T085 Create performance validation for SC-007 in two parts: automated mocked pipeline timing plus manual real-device protocol (permission prompt through weather render) with recorded evidence for <8s target
 - [x] T086 Add SC-006 UX validation with objective checks: exact label text, visible in initial viewport at 320px/768px/1920px, and first tabbable actionable control on initial load (plus screenshot evidence)
 - [x] T090 Validate geolocation runtime requirements: confirm HTTPS/localhost requirement is documented and geolocation error messaging covers insecure-context/unavailable API cases

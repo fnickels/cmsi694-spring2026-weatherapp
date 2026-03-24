@@ -310,4 +310,31 @@ test.describe('Integration: Complete Feature Matrix', () => {
       await expect(page.getByText(/15°C/i)).toBeVisible()
     }
   })
+
+  test('late geolocation result does not override manual search selection', async ({ page }) => {
+    mockApisWithLocation(page)
+
+    await page.addInitScript(() => {
+      Object.defineProperty(window.navigator, 'geolocation', {
+        configurable: true,
+        value: {
+          getCurrentPosition: (success) => {
+            setTimeout(() => {
+              success({ coords: { latitude: 41.88, longitude: -87.63 } })
+            }, 5200)
+          },
+        },
+      })
+    })
+
+    await page.goto('/')
+
+    await page.getByLabel('Location search').fill('Tokyo')
+    await page.getByRole('button', { name: 'Search' }).click()
+    await expect(page.getByLabel('Current weather').getByText(/Tokyo/i)).toBeVisible()
+
+    await page.waitForTimeout(6200)
+    await expect(page.getByLabel('Current weather').getByText(/Tokyo/i)).toBeVisible()
+    await expect(page.getByLabel('Current weather').getByText(/Chicago/i)).toHaveCount(0)
+  })
 })

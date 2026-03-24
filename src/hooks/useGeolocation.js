@@ -3,7 +3,16 @@
  * Wraps browser Geolocation API to get user's current coordinates
  */
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback } from 'react'
+
+const GEOLOCATION_TIMEOUT_MS = 5000
+
+export function classifyGeolocationError(errorCode) {
+  if (errorCode === 1) return 'denied'
+  if (errorCode === 2) return 'unavailable'
+  if (errorCode === 3) return 'timeout'
+  return 'unknown'
+}
 
 export function useGeolocation() {
   const [latitude, setLatitude] = useState(null)
@@ -23,11 +32,11 @@ export function useGeolocation() {
     setLatitude(null)
     setLongitude(null)
 
-    // 8-second timeout for geolocation permission + API call per spec
+    // 5-second timeout for geolocation permission + API call per spec
     const timeoutId = setTimeout(() => {
       setError('Geolocation request took too long. Please try again.')
       setIsLoading(false)
-    }, 8000)
+    }, GEOLOCATION_TIMEOUT_MS)
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -39,15 +48,14 @@ export function useGeolocation() {
       },
       (err) => {
         clearTimeout(timeoutId)
-        // Map geolocation error codes to user-friendly messages
-        switch (err.code) {
-          case err.PERMISSION_DENIED:
+        switch (classifyGeolocationError(err.code)) {
+          case 'denied':
             setError('Please enable location access in your browser to use geolocation')
             break
-          case err.POSITION_UNAVAILABLE:
+          case 'unavailable':
             setError('Location information is unavailable. Try searching instead.')
             break
-          case err.TIMEOUT:
+          case 'timeout':
             setError('Geolocation request timed out. Please try again.')
             break
           default:
@@ -56,7 +64,7 @@ export function useGeolocation() {
         setIsLoading(false)
       },
       {
-        timeout: 8000,
+        timeout: GEOLOCATION_TIMEOUT_MS,
         enableHighAccuracy: true,
         maximumAge: 0
       }

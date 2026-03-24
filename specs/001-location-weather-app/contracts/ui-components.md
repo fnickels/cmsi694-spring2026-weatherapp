@@ -19,8 +19,14 @@ Props:
   onUseMyLocation: () => void
     // Called when "Use My Location" button is clicked
 
-  isLoading: boolean
-    // When true: input and buttons are disabled; loading state communicated to user
+  searchLoading?: boolean
+    // When true: the text input and Search button are disabled
+
+  geolocationLoading?: boolean
+    // When true: the "Use My Location" button is disabled and shows locating copy
+
+  helperMessage?: string
+    // Optional parent-provided helper/fallback text shown beneath the buttons
 
   disabled?: boolean
     // Optional override to disable the entire component
@@ -54,17 +60,13 @@ Primary weather display card. Shows condition icon, temperature, and condition l
 
 ```ts
 Props:
-  weather: {
-    conditionLabel: string
-    conditionIcon: string
-    displayTemperature: string    // Formatted string, e.g., "45°F" or "7°C"
-    displayFeelsLike: string      // Formatted, e.g., "Feels like 39°F"
-    observationTime: string       // Formatted local time, e.g., "2:00 PM"
-  }
-  locationName: string            // e.g., "Chicago, Illinois, United States"
+  weather: CurrentWeather
+  location: Location | null
+  unit?: "imperial" | "metric"
+  source?: "manual" | "auto-detected"
 ```
 
-**Visual**: Glassmorphism card (`bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl`). Condition icon displayed prominently above temperature.
+**Visual**: Glassmorphism card (`bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl`). The rendered card includes formatted temperature, feels-like text, coordinates, optional auto-detected badge, conditional area details, and local-time metadata.
 
 ---
 
@@ -91,12 +93,10 @@ Disambiguation list shown when a search returns multiple location matches.
 ```ts
 Props:
   locations: Array<{
-    id: number
+    id: string
     displayName: string
   }>
-  onSelect: (location: { id: number, displayName: string, latitude: number, longitude: number }) => void
-  onDismiss: () => void
-    // Called if user closes/cancels the disambiguation without selecting
+  onSelect: (location: { id: string, displayName: string, latitude: number, longitude: number }) => void
 ```
 
 **Accessibility**: List items MUST be keyboard navigable (arrow keys or tab). Selected item MUST receive focus on selection. MUST have a descriptive heading (e.g., "Multiple locations found — please select one").
@@ -110,12 +110,12 @@ Renders up to 5 recent searches as clickable chips.
 ```ts
 Props:
   searches: Array<{
-    id: number
+    id: string
     displayName: string
     latitude: number
     longitude: number
   }>
-  onSelect: (search: { id: number, displayName: string, latitude: number, longitude: number }) => void
+  onSelect: (search: { id: string, displayName: string, latitude: number, longitude: number }) => void
 ```
 
 **Rendered**: Horizontal scrollable row of pill/chip buttons below the search bar. Hidden entirely when `searches` is empty.  
