@@ -2,7 +2,7 @@
 
 **Feature**: Weather Forecast & Maps Display  
 **Branch**: `004-forecast-maps-display`  
-**Status**: Actionable  
+**Status**: In Progress (Phase 3)  
 **Generated**: 2026-03-24  
 
 ## Overview
@@ -21,10 +21,10 @@ This tasks document provides a fully actionable breakdown of implementation work
 
 ### Setup Tasks
 
-- [ ] T001 Add Leaflet and React-Leaflet to package.json dependencies; run `npm install` to lock versions
-- [ ] T002 Verify Vite config includes necessary loaders for map library assets and Tailwind CSS integration
-- [ ] T003 Create `.eslintignore` entries (if needed) for third-party map library code to prevent false linting errors
-- [ ] T004 Update npm run scripts in package.json to include test coverage reporting (e.g., `npm run test:coverage`)
+- [x] T001 Add Leaflet and React-Leaflet to package.json dependencies; run `npm install` to lock versions
+- [x] T002 Verify Vite config includes necessary loaders for map library assets and Tailwind CSS integration
+- [x] T003 Create `.eslintignore` entries (if needed) for third-party map library code to prevent false linting errors
+- [x] T004 Update npm run scripts in package.json to include test coverage reporting (e.g., `npm run test:coverage`)
 
 ---
 
@@ -39,11 +39,11 @@ This tasks document provides a fully actionable breakdown of implementation work
 
 ### Utility & Service Tasks
 
-- [ ] T005 [P] Create `src/utils/requestCache.js` with session-scoped cache implementation supporting TTL, key generation, and expiry logic; include unit tests in `tests/unit/requestCache.test.js`
-- [ ] T006 [P] Create `src/utils/forecastTransform.js` to normalize Open-Meteo forecast API responses into `Forecast Bundle` and `Hourly Forecast Point` objects; include unit tests in `tests/unit/forecastTransform.test.js`
-- [ ] T007 [P] Create `src/services/forecast.js` with functions to: fetch daily+hourly forecast for a location, perform point inspection queries, and handle API errors; use `requestCache` for response caching; include unit tests in `tests/unit/forecastService.test.js`
-- [ ] T008 [P] Create `src/services/overlays.js` with functions to: fetch RainViewer precipitation metadata, build NASA GIBS tile URLs for temperature and cloud-cover, manage overlay availability; include unit tests in `tests/unit/overlaysService.test.js`
-- [ ] T009 Create `src/utils/unitConversions.js` extension (if not already present) to support temperature conversions (Celsius ↔ Fahrenheit) and precipitation conversions (mm ↔ in); include unit tests in `tests/unit/unitConversions.test.js`
+- [x] T005 [P] Create `src/utils/requestCache.js` with session-scoped cache implementation supporting TTL, key generation, and expiry logic; include unit tests in `tests/unit/requestCache.test.js`
+- [x] T006 [P] Create `src/utils/forecastTransform.js` to normalize Open-Meteo forecast API responses into `Forecast Bundle` and `Hourly Forecast Point` objects; include unit tests in `tests/unit/forecastTransform.test.js`
+- [x] T007 [P] Create `src/services/forecast.js` with functions to: fetch daily+hourly forecast for a location, perform point inspection queries, and handle API errors; use `requestCache` for response caching; include unit tests in `tests/unit/forecastService.test.js`
+- [x] T008 [P] Create `src/services/overlays.js` with functions to: fetch RainViewer precipitation metadata, build NASA GIBS tile URLs for temperature and cloud-cover, manage overlay availability; include unit tests in `tests/unit/overlaysService.test.js`
+- [x] T009 Create `src/utils/unitConversions.js` extension (if not already present) to support temperature conversions (Celsius ↔ Fahrenheit) and precipitation conversions (mm ↔ in); include unit tests in `tests/unit/unitConversions.test.js`
 
 ---
 
@@ -61,11 +61,11 @@ This tasks document provides a fully actionable breakdown of implementation work
 
 ### User Story 1 Tasks
 
-- [ ] T010 Create `src/hooks/useForecastData.js` hook to manage forecast fetch, caching, unit conversion, and error states; implement lazy loading so fetch only triggers when forecast view is opened; pass unit tests in `tests/integration/ForecastView.test.jsx`
-- [ ] T011 [P] [US1] Create `src/components/DailyForecastStrip.jsx` to render 5-7 summary cards showing date label, condition icon, min/max temperature (unit-aware), and precipitation probability
-- [ ] T012 [P] [US1] Create `src/components/HourlyForecastPanel.jsx` to render hourly breakdown as rows or cards showing hour, temperature (unit-aware), condition icon, and precipitation probability; support responsive mobile layout
-- [ ] T013 [P] [US1] Create `src/components/ForecastPanel.jsx` as the container component that: manages loading/ready/error states, displays daily strip and hourly panel, handles day selection for hourly drill-down, includes retry on error, and respects unit preference changes
-- [ ] T014 [US1] Create `src/components/ResultsViewTabs.jsx` to render a semantic tablist with `Current`, `Forecast`, and `Map` tab buttons; implement manual activation (no auto-focus on arrow keys) to prevent premature data fetching
+- [x] T010 Create `src/hooks/useForecastData.js` hook to manage forecast fetch, caching, unit conversion, and error states; implement lazy loading so fetch only triggers when forecast view is opened; pass unit tests in `tests/integration/ForecastView.test.jsx`
+- [x] T011 [P] [US1] Create `src/components/DailyForecastStrip.jsx` to render 5-7 summary cards showing date label, condition icon, min/max temperature (unit-aware), and precipitation probability
+- [x] T012 [P] [US1] Create `src/components/HourlyForecastPanel.jsx` to render hourly breakdown as rows or cards showing hour, temperature (unit-aware), condition icon, and precipitation probability; support responsive mobile layout
+- [x] T013 [P] [US1] Create `src/components/ForecastPanel.jsx` as the container component that: manages loading/ready/error states, displays daily strip and hourly panel, handles day selection for hourly drill-down, includes retry on error, and respects unit preference changes
+- [x] T014 [US1] Create `src/components/ResultsViewTabs.jsx` to render a semantic tablist with `Current`, `Forecast`, and `Map` tab buttons; implement manual activation (no auto-focus on arrow keys) to prevent premature data fetching
 - [ ] T015 [US1] Integrate `useForecastData` hook and `ForecastPanel` into `src/App.jsx` to connect the forecast view with the location context and trigger lazy loading on tab activation
 - [ ] T016 [US1] Create integration tests in `tests/integration/ForecastView.test.jsx` to verify: forecast tab renders, data loads when activated, unit toggle updates all values, location change triggers new forecast fetch, and error messages display correctly
 - [ ] T017 [US1] Create end-to-end tests in `tests/e2e/forecast-view.spec.js` to verify: user searches for a location, clicks Forecast tab, sees 7-day forecast plus 24-hour drill-down within 3 seconds, and toggles units
