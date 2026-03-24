@@ -1,215 +1,281 @@
-# Tasks: Weather Forecast & Maps Display
+# Tasks: Weather Forecast & Maps Display (004)
 
-**Input**: Design documents from `/specs/004-forecast-maps-display/`
-**Prerequisites**: plan.md (required), spec.md (required), research.md, data-model.md, contracts/, quickstart.md
+**Feature**: Weather Forecast & Maps Display  
+**Branch**: `004-forecast-maps-display`  
+**Status**: Actionable  
+**Generated**: 2026-03-24  
 
-**Tests**: Include automated tests because the specification and constitution require happy-path and failure-path coverage.
+## Overview
 
-**Organization**: Tasks are grouped by user story so each story can be implemented, tested, and demonstrated independently.
-
-## Phase 1: Setup
-
-**Purpose**: Install and wire project dependencies required for forecast and map delivery.
-
-- [x] T001 Add `leaflet` and `react-leaflet` runtime dependencies in `package.json`
-- [x] T002 Import Leaflet CSS in `src/main.jsx`
-
-**Checkpoint**: The project can build with Leaflet installed and its CSS loaded.
+This tasks document provides a fully actionable breakdown of implementation work for the weather forecast and maps display feature. Tasks are organized by user story (priority order) with clear success criteria, file paths, and dependency relationships. Each task follows the checklist format and is independently testable within its phase.
 
 ---
 
-## Phase 2: Foundational
+## Phase 1: Project Setup & Infrastructure
 
-**Purpose**: Shared utilities, validation, and service contracts that block all user stories.
+**Goal**: Establish project dependencies and foundational infrastructure  
+**Success Criteria**:
+- Package.json updated with required dependencies (Leaflet, React-Leaflet)
+- Build and test commands execute cleanly
+- Linting and type-checking pass on all new files
 
-**⚠️ CRITICAL**: No user story work can begin until this phase is complete.
+### Setup Tasks
 
-- [x] T003 [P] Create in-memory and `sessionStorage` cache helpers in `src/utils/requestCache.js`
-- [x] T004 [P] Create forecast response normalization helpers in `src/utils/forecastTransform.js`
-- [x] T005 [P] Create cache helper tests in `tests/unit/requestCache.test.js`
-- [x] T006 [P] Create forecast transform tests in `tests/unit/forecastTransform.test.js`
-- [x] T007 Create validated Open-Meteo forecast and point-inspection service functions in `src/services/forecast.js`
-- [x] T008 [P] Create forecast service validation and timeout tests in `tests/unit/forecastService.test.js`
-- [x] T009 Create exact overlay provider configuration, pinned NASA GIBS layer IDs, and URL builders in `src/services/overlays.js`
-- [x] T010 [P] Create overlay service tests for RainViewer metadata parsing and GIBS layer config in `tests/unit/overlaysService.test.js`
-
-**Checkpoint**: Cache, transform, forecast, and overlay services are implemented with explicit input validation and test coverage.
+- [ ] T001 Add Leaflet and React-Leaflet to package.json dependencies; run `npm install` to lock versions
+- [ ] T002 Verify Vite config includes necessary loaders for map library assets and Tailwind CSS integration
+- [ ] T003 Create `.eslintignore` entries (if needed) for third-party map library code to prevent false linting errors
+- [ ] T004 Update npm run scripts in package.json to include test coverage reporting (e.g., `npm run test:coverage`)
 
 ---
 
-## Phase 3: User Story 1 - View Extended Forecast After Location Selection (Priority: P1) 🎯 MVP
+## Phase 2: Foundational Utilities & Services
 
-**Goal**: Let users open a Forecast tab after current weather loads and view a 7-day daily forecast plus a 24-hour hourly drill-down.
+**Goal**: Build reusable utilities and service layer for forecast, geocoding, and caching  
+**Success Criteria**:
+- All utility functions have unit test coverage >80%
+- Services pass mock-based integration tests
+- No external API keys introduced
+- Cache behavior verified in unit tests
 
-**Independent Test**: Search for a city, open Forecast, verify daily and hourly forecast content renders correctly, and confirm unit toggling updates all forecast values.
+### Utility & Service Tasks
 
-### Tests for User Story 1
-
-- [x] T011 [P] [US1] Create Forecast tab integration coverage in `tests/integration/ForecastView.test.jsx`
-- [x] T012 [P] [US1] Create end-to-end forecast flow coverage in `tests/e2e/forecast-view.spec.js`
-
-### Implementation for User Story 1
-
-- [x] T013 [US1] Create accessible result view tabs in `src/components/ResultsViewTabs.jsx`
-- [x] T014 [P] [US1] Create lazy forecast data hook in `src/hooks/useForecastData.js`
-- [x] T015 [P] [US1] Create daily forecast summary strip in `src/components/DailyForecastStrip.jsx`
-- [x] T016 [P] [US1] Create hourly forecast drill-down panel in `src/components/HourlyForecastPanel.jsx`
-- [x] T017 [US1] Create forecast container with loading, retry, and error states in `src/components/ForecastPanel.jsx`
-- [x] T018 [US1] Integrate `ResultsViewTabs` and `ForecastPanel` into `src/App.jsx`
-
-**Checkpoint**: User Story 1 is fully functional and testable as the MVP increment.
+- [ ] T005 [P] Create `src/utils/requestCache.js` with session-scoped cache implementation supporting TTL, key generation, and expiry logic; include unit tests in `tests/unit/requestCache.test.js`
+- [ ] T006 [P] Create `src/utils/forecastTransform.js` to normalize Open-Meteo forecast API responses into `Forecast Bundle` and `Hourly Forecast Point` objects; include unit tests in `tests/unit/forecastTransform.test.js`
+- [ ] T007 [P] Create `src/services/forecast.js` with functions to: fetch daily+hourly forecast for a location, perform point inspection queries, and handle API errors; use `requestCache` for response caching; include unit tests in `tests/unit/forecastService.test.js`
+- [ ] T008 [P] Create `src/services/overlays.js` with functions to: fetch RainViewer precipitation metadata, build NASA GIBS tile URLs for temperature and cloud-cover, manage overlay availability; include unit tests in `tests/unit/overlaysService.test.js`
+- [ ] T009 Create `src/utils/unitConversions.js` extension (if not already present) to support temperature conversions (Celsius ↔ Fahrenheit) and precipitation conversions (mm ↔ in); include unit tests in `tests/unit/unitConversions.test.js`
 
 ---
 
-## Phase 4: User Story 2 - View Interactive Map Showing Location (Priority: P2)
+## Phase 3: User Story 1 – View Extended Forecast After Location Selection (Priority: P1)
 
-**Goal**: Let users open a Map tab and view an interactive map centered on the selected location with a marker, zoom/pan support, and graceful fallback states.
+**User Story Goal**: Display 5-7 day daily forecast and 24-hour hourly breakdown after location is selected  
 
-**Independent Test**: Search for a city, open Map, verify the map centers on the location with a marker, and confirm the map does not initialize before the Map tab is opened.
+**Independent Test Criteria**:
+- Forecast tab appears when location is resolved
+- 7-day forecast data loads within 3 seconds and displays date, condition icon, min/max temperature, and precipitation probability
+- 24-hour hourly panel shows hour, temperature, condition, and precipitation
+- All values update when unit preference changes (imperial ↔ metric)
+- Forecast automatically refreshes when location changes
+- Loading and error states are visible
 
-### Tests for User Story 2
+### User Story 1 Tasks
 
-- [x] T019 [P] [US2] Create base map integration coverage in `tests/integration/MapView.test.jsx`
-
-### Implementation for User Story 2
-
-- [x] T020 [P] [US2] Create base map state management hook in `src/hooks/useMapOverlayState.js`
-- [x] T021 [P] [US2] Create map fallback summary component in `src/components/MapFallbackSummary.jsx`
-- [x] T022 [US2] Create Leaflet map adapter with marker and click passthrough in `src/components/WeatherMapCanvas.jsx`
-- [x] T023 [US2] Create lazy-loaded map panel with fallback handling in `src/components/WeatherMapPanel.jsx`
-- [x] T024 [US2] Integrate `WeatherMapPanel` into `src/App.jsx`
-
-**Checkpoint**: User Story 2 is fully functional and independently testable.
-
----
-
-## Phase 5: User Story 3 - View Forecast on Map with Regional Weather Pattern (Priority: P3)
-
-**Goal**: Add switchable precipitation, temperature, and cloud-cover overlays with legends and click/tap inspection on the map.
-
-**Independent Test**: Open Map, switch each overlay, verify legend updates, click or tap the map, and confirm an inspected overlay summary appears outside the map surface.
-
-### Tests for User Story 3
-
-- [x] T025 [P] [US3] Create overlay failure-path integration coverage in `tests/integration/OverlayFailureStates.test.jsx`
-- [x] T026 [P] [US3] Create end-to-end overlay switching and inspection coverage in `tests/e2e/map-overlays.spec.js`
-
-### Implementation for User Story 3
-
-- [x] T027 [P] [US3] Create overlay legend component in `src/components/WeatherLayerLegend.jsx`
-- [x] T028 [US3] Extend overlay rendering and switching in `src/components/WeatherMapCanvas.jsx`
-- [x] T029 [US3] Extend inspection fetching, coordinate validation, and caching in `src/hooks/useMapOverlayState.js`
-- [x] T030 [US3] Extend overlay controls, legend display, and inspection summary in `src/components/WeatherMapPanel.jsx`
-- [x] T031 [US3] Wire overlay control and inspection state into `src/App.jsx`
-
-**Checkpoint**: User Story 3 is fully functional and independently testable.
+- [ ] T010 Create `src/hooks/useForecastData.js` hook to manage forecast fetch, caching, unit conversion, and error states; implement lazy loading so fetch only triggers when forecast view is opened; pass unit tests in `tests/integration/ForecastView.test.jsx`
+- [ ] T011 [P] [US1] Create `src/components/DailyForecastStrip.jsx` to render 5-7 summary cards showing date label, condition icon, min/max temperature (unit-aware), and precipitation probability
+- [ ] T012 [P] [US1] Create `src/components/HourlyForecastPanel.jsx` to render hourly breakdown as rows or cards showing hour, temperature (unit-aware), condition icon, and precipitation probability; support responsive mobile layout
+- [ ] T013 [P] [US1] Create `src/components/ForecastPanel.jsx` as the container component that: manages loading/ready/error states, displays daily strip and hourly panel, handles day selection for hourly drill-down, includes retry on error, and respects unit preference changes
+- [ ] T014 [US1] Create `src/components/ResultsViewTabs.jsx` to render a semantic tablist with `Current`, `Forecast`, and `Map` tab buttons; implement manual activation (no auto-focus on arrow keys) to prevent premature data fetching
+- [ ] T015 [US1] Integrate `useForecastData` hook and `ForecastPanel` into `src/App.jsx` to connect the forecast view with the location context and trigger lazy loading on tab activation
+- [ ] T016 [US1] Create integration tests in `tests/integration/ForecastView.test.jsx` to verify: forecast tab renders, data loads when activated, unit toggle updates all values, location change triggers new forecast fetch, and error messages display correctly
+- [ ] T017 [US1] Create end-to-end tests in `tests/e2e/forecast-view.spec.js` to verify: user searches for a location, clicks Forecast tab, sees 7-day forecast plus 24-hour drill-down within 3 seconds, and toggles units
 
 ---
 
-## Final Phase: Polish & Cross-Cutting Concerns
+## Phase 4: User Story 2 – View Interactive Map Showing Location (Priority: P2)
 
-**Purpose**: Close the remaining compliance, measurement, accessibility, responsiveness, and consistency work across all stories.
+**User Story Goal**: Display selected location on an interactive map with zoom/pan controls; map loads only when Map view is opened  
 
-- [x] T032 [P] Document no-key external service usage, local verification steps, and client-side failure-diagnostics expectations in `README.md` and `specs/004-forecast-maps-display/quickstart.md`
-- [x] T033 [P] Document repeatable measurement protocol for SC-002 and SC-003 plus manual evaluation protocol for SC-004 and SC-008 in `README.md` and `specs/004-forecast-maps-display/quickstart.md`
-- [x] T034 [P] Audit and fix responsive layout and keyboard behavior in `src/components/ResultsViewTabs.jsx`, `src/components/DailyForecastStrip.jsx`, `src/components/HourlyForecastPanel.jsx`, `src/components/WeatherMapPanel.jsx`, and `src/components/WeatherLayerLegend.jsx`
-- [x] T035 [P] Apply existing visual styling and attribution requirements in `src/components/ForecastPanel.jsx`, `src/components/WeatherMapPanel.jsx`, `src/components/WeatherMapCanvas.jsx`, and `src/components/MapFallbackSummary.jsx`
-- [x] T036 Verify shared loading, error presentation, and client-side failure diagnostics in `src/components/ForecastPanel.jsx`, `src/components/WeatherMapPanel.jsx`, `src/services/forecast.js`, `src/services/overlays.js`, `tests/integration/ForecastView.test.jsx`, and `tests/integration/MapView.test.jsx`
+**Independent Test Criteria**:
+- Map tab appears when location is resolved
+- Map loads within 4 seconds of tab activation
+- Map is centered on selected location with visible marker
+- Zoom and pan controls respond to mouse and touch inputs
+- Map re-centers and de-centers marker when location changes
+- Loading and error states are visible
+- Unsupported browser falls back to text summary
+
+### User Story 2 Tasks
+
+- [ ] T018 Create `src/hooks/useMapOverlayState.js` hook to manage map view status (idle/loading/ready/error), active overlay, loaded overlays, legend visibility, and inspection state; include unit tests in `tests/unit/useMapOverlayState.test.js`
+- [ ] T019 [P] [US2] Create `src/components/WeatherMapCanvas.jsx` as a thin Leaflet adapter that: initializes map only on first render, displays base tiles (OpenStreetMap), centers on provided coordinates, exposes zoom/pan controls, handles click/tap events, and emits errors without leaking DOM internals
+- [ ] T020 [P] [US2] Create `src/components/WeatherLayerLegend.jsx` to display text-based legend for active overlay (precipitation, temperature, or cloud-cover) with color swatches, labels, and unit information where applicable
+- [ ] T021 [P] [US2] Create `src/components/MapFallbackSummary.jsx` to provide a non-map text-based fallback when the map is unavailable (browser unsupported, API error, etc.); display location info and overlay information in text
+- [ ] T022 [US2] Create `src/components/WeatherMapPanel.jsx` as the container component that: manages map status and overlay state, renders overlay controls (radio buttons or toggle buttons for precipitation, temperature, cloud-cover), displays the map canvas or fallback, includes a legend for the active overlay, shows inspected value summary, includes retry on error
+- [ ] T023 [US2] Integrate `useMapOverlayState` hook and `WeatherMapPanel` into `src/App.jsx` to connect the map view with the location context and trigger lazy loading (Leaflet bundle and initial tile fetch) on tab activation
+- [ ] T024 [US2] Create integration tests in `tests/integration/MapView.test.jsx` to verify: map tab renders, Leaflet loads when activated, map centers on location, zoom/pan controls are functional, location change updates map center, and error messages display correctly
+- [ ] T025 [US2] Create end-to-end tests in `tests/e2e/map-view.spec.js` to verify: user searches for a location, clicks Map tab, sees the map and controls within 4 seconds, zooms and pans the map, and location change re-centers the map
 
 ---
 
-## Dependencies
+## Phase 5: User Story 3 – View Forecast on Map with Regional Weather Pattern (Priority: P3)
 
-### Story Completion Order
+**User Story Goal**: Display switchable weather layers (precipitation, temperature, cloud-cover) on the map; support click/tap inspection of overlay values  
 
-```text
-Phase 1: Setup
-  -> Phase 2: Foundational
-    -> Phase 3: User Story 1 (MVP)
-      -> Phase 4: User Story 2
-        -> Phase 5: User Story 3
-          -> Final Phase: Polish & Cross-Cutting Concerns
+**Independent Test Criteria**:
+- Overlay controls (precipitation, temperature, cloud-cover) appear in Map view
+- Only one overlay is active at a time; switching overlays updates the map tiles and legend
+- Active layer legend displays correctly with color scale and unit labels
+- Clicking/tapping on the map shows inspected value for that location in the active overlay
+- Inspected values use Open-Meteo point forecast, not pixel extraction
+- Inspected values respect unit preference (Celsius vs. Fahrenheit, mm vs. inches)
+- Failed overlay loads emit user-visible errors
+- Overlay tiles load only when requested
+
+### User Story 3 Tasks
+
+- [ ] T026 Extend `src/hooks/useMapOverlayState.js` to add overlay state management: activeOverlay, loadedOverlays array, inspection state (latitude, longitude, value, unit, status); trigger overlay tile fetch only when overlay is selected
+- [ ] T027 [P] [US3] Create `src/services/overlays.js` export functions to: fetch RainViewer metadata and build precipitation tile URLs, build NASA GIBS tile URLs for temperature and cloud-cover, manage layer availability and error states
+- [ ] T028 [P] [US3] Extend `src/components/WeatherMapCanvas.jsx` to support adding/removing overlay tile layers dynamically; render the active overlay on top of the base map; emit click events with latitude/longitude coordinates
+- [ ] T029 [P] [US3] Update `src/components/WeatherLayerLegend.jsx` to display detailed legends for each overlay type: Precipitation (with mm/in scale), Temperature (with Celsius/Fahrenheit scale and color gradient), Cloud Cover (with percentage scale)
+- [ ] T030 [US3] Create `src/hooks/useOverlayInspection.js` hook to manage point inspection state: fetch Open-Meteo point query when user clicks map, cache results, handle errors, format values for display
+- [ ] T031 [US3] Update `src/components/WeatherMapPanel.jsx` to: render overlay toggle controls, manage active overlay switching, handle inspection clicks, display inspected value summary with unit formatting, show overlay load errors
+- [ ] T032 [US3] Create integration tests in `tests/integration/OverlayFailureStates.test.jsx` to verify: overlays are selectable, active overlay updates legend, inspection fetch works and displays values, unit conversion applies to inspected values, overlay load errors are handled
+- [ ] T033 [US3] Create end-to-end tests in `tests/e2e/map-overlays.spec.js` to verify: user opens Map tab, selects precipitation overlay, sees precipitation tiles and legend, clicks a map point, inspects the value, switches to temperature overlay, and inspected value updates
+
+---
+
+## Phase 6: Polish, Integration & Cross-Cutting Concerns
+
+**Goal**: Ensure all features work together, accessibility is verified, performance targets are met, and documentation is complete  
+
+**Success Criteria**:
+- All tabs switch smoothly without data loss
+- Tab keyboard navigation follows WAI-ARIA conventions
+- Performance targets met: forecast <3s, map <4s, unit toggle <500ms
+- Mobile responsive down to 375px; no horizontal scroll
+- Error fallbacks are user-friendly and actionable
+- Diagnostics logged in dev/test for troubleshooting
+
+### Integration & Polish Tasks
+
+- [ ] T034 Integrate `ResultsViewTabs` into the main App layout to replace or wrap the current weather view; ensure tab switching preserves all state
+- [ ] T035 Update `src/App.jsx` to: initialize `useWeather` (current), `useForecastData` (lazy), and `useMapOverlayState` (lazy); pass unit preference to all views; coordinate location changes across all tabs
+- [ ] T036 Create `tests/integration/App.test.jsx` update to verify all three views (Current, Forecast, Map) can be opened in sequence, unit toggle affects all, location changes trigger all updates, and errors in one view do not break others
+- [ ] T037 Create `tests/e2e/comprehensive-flows.spec.js` to verify multi-view workflows: search location, view current, open forecast, switch units, open map, select overlay, inspect point, change location, verify all views update
+- [ ] T038 Add keyboard navigation tests to `tests/integration/App.test.jsx` to verify: Tab key navigates between tablist items, manual activation (no auto-focus), Enter/Space activates tabs, Escape does not close tabs, legend and map controls are reachable
+- [ ] T039 Extend `tests/integration/Accessibility.test.jsx` to verify: tab items have `role="tab"`, tabpanels have `role="tabpanel"`, all controls have visible labels, color is not the only indicator in legends, text alternatives exist for icons
+- [ ] T040 Create performance measurement test in `tests/e2e/forecast-view.spec.js` and `tests/e2e/map-view.spec.js` to measure and log: forecast view load time from tab activation to content render (target <3s), map view load time from tab activation to visible map (target <4s)
+- [ ] T041 Create responsive layout tests in `tests/integration/App.test.jsx` to verify: forecast and map stack vertically on mobile (<600px width), no horizontal scroll on 375px viewport, touch interactions work on mobile viewports
+- [ ] T042 Update `src/index.css` and Tailwind config to ensure all new components (tabs, forecast cards, map, legends, overlays) are styled consistently with existing app theme (colors, typography, spacing, dark mode if applicable)
+- [ ] T043 Update `src/App.jsx` to add client-side diagnostic logging: log forecast fetch start/end with duration, log map load start/end, log overlay tile requests, log inspection queries; enable logs in dev/test only
+- [ ] T044 Create error boundary component or update `ErrorMessage.jsx` to handle loading/error states for all three views with user-friendly, actionable messages (e.g., "Forecast unavailable—try again or use a different location")
+- [ ] T045 Update `quickstart.md` with testing instructions: how to run forecast-view.spec.js, map-view.spec.js, map-overlays.spec.js, how to verify performance targets locally, how to enable diagnostics
+- [ ] T046 Update repository `README.md` with links to the feature specification, implementation notes on Open-Meteo and Leaflet usage, and explanation of free overlay sources
+- [ ] T047 Review all components and services against accessibility checklist: correct heading levels, semantic HTML, focus management, color contrast, label associations; document any deviations
+- [ ] T048 Final integration test: run all unit tests, run all integration tests, run Playwright suite end-to-end; verify zero console errors, zero type warnings (if using TypeScript inference), and all tests pass
+- [ ] T049 Document known limitations in `quickstart.md` or a DECISIONS.md file: Leaflet does not support WebGL vector rendering (acceptable for raster overlays), RainViewer precision depends on their data refresh rate, NASA GIBS tiles may have latency, OOM risk if many locations are cached in a session
+
+---
+
+## Dependency Graph
+
+```
+Phase 1 (Setup)
+  └─ Phase 2 (Utilities & Services)
+       ├─ Phase 3 (User Story 1: Forecast)
+       │   └─ Phase 4 (User Story 2: Map)  [can start in parallel with Phase 3 after Phase 2 completes]
+       │       └─ Phase 5 (User Story 3: Overlays)  [depends on Phase 4]
+       └─ Phase 6 (Integration & Polish)  [starts after all story phases]
 ```
 
-### Phase Dependencies
+**Parallelization Opportunities**:
+- All tasks in Phase 2 (utilities/services) are parallelizable: `forecast.js`, `overlays.js`, `requestCache.js`, `forecastTransform.js` can be developed independently
+- Tasks T011–T013 (Daily Strip, Hourly Panel, Forecast Panel) can be developed in parallel once `useForecastData` is drafted
+- Tasks T019–T021 (Map Canvas, Legend, Fallback) can be developed in parallel once `useMapOverlayState` is drafted
+- Tasks T031–T033 (Overlay Panel updates, inspection hook, tests) can be developed in parallel for Story 3
 
-- Setup tasks T001-T002 must complete before any Leaflet-backed work begins.
-- Foundational tasks T003-T010 must complete before story implementation begins.
-- User Story 1 must complete before User Story 2 because tabs and forecast result-view structure are shared.
-- User Story 2 must complete before User Story 3 because overlay rendering and inspection extend the base map view.
-- Final-phase tasks depend on completed behavior in at least one user story, and most depend on all stories being implemented.
+---
 
-### Intra-Phase Parallel Opportunities
+## MVP Scope Recommendation
 
-- In Phase 2, T003-T006, T008, and T010 can proceed in parallel because they target separate files.
-- In Phase 3, T011 and T012 can proceed in parallel; T014-T016 can proceed in parallel once T013 defines the tab contract.
-- In Phase 4, T019-T021 can proceed in parallel; T022-T024 then follow.
-- In Phase 5, T025-T027 can proceed in parallel; T028-T031 then follow in order.
-- In the Final Phase, T032-T035 can proceed in parallel; T036 should finish last.
+**Phase 1 + Phase 2 + Phase 3** = **Minimum Viable Product**
 
-## Parallel Execution Examples
+The MVP delivers User Story 1 (View Extended Forecast) with all dependencies satisfied:
+- Reusable utilities and services (Phase 2) ready for future map/overlay work
+- Forecast loading, display, unit-aware rendering, and error handling (Phase 3) fully functional
+- All story-1-specific tests passing
+- Users can search a location and view a 7-day forecast + 24-hour hourly breakdown
 
-### User Story 1
+Estimated effort: **~40–50 development hours** (covering tasks T001–T017)
 
-```text
-T011 + T012 + T014 + T015 + T016
-  -> T017
-  -> T018
+**Phases 4–5** add Map and Overlay capabilities in priority order; both can be added incrementally without modifying Phase 3 code.
+
+**Phase 6** is ongoing throughout and finalizes polish, performance, and documentation.
+
+---
+
+## Task Checklist Legend
+
+- **Checkbox** (`- [ ]`): Mark complete as work progresses
+- **Task ID** (T001, T002...): Sequential identifier for tracking
+- **[P]**: Parallelizable task (can run in parallel with others at same depth)
+- **[US#]**: User Story label (US1, US2, US3) for story-phase tasks only
+- **Description**: Clear action with file path(s)
+
+**Example Completed Task**:
+- [x] T001 Add Leaflet and React-Leaflet to package.json dependencies; run `npm install` to lock versions
+
+---
+
+## File Structure Reference
+
+```
+src/
+├── components/
+│   ├── ResultsViewTabs.jsx          [T014]
+│   ├── ForecastPanel.jsx            [T013]
+│   ├── DailyForecastStrip.jsx       [T011]
+│   ├── HourlyForecastPanel.jsx      [T012]
+│   ├── WeatherMapPanel.jsx          [T022, T031]
+│   ├── WeatherMapCanvas.jsx         [T019, T028]
+│   ├── WeatherLayerLegend.jsx       [T020, T029]
+│   └── MapFallbackSummary.jsx       [T021]
+├── hooks/
+│   ├── useForecastData.js           [T010]
+│   ├── useMapOverlayState.js        [T018, T026]
+│   └── useOverlayInspection.js      [T030]
+├── services/
+│   ├── forecast.js                  [T007]
+│   └── overlays.js                  [T008, T027]
+├── utils/
+│   ├── requestCache.js              [T005]
+│   ├── forecastTransform.js         [T006]
+│   └── unitConversions.js           [T009]
+└── App.jsx                          [T015, T023, T035]
+
+tests/
+├── unit/
+│   ├── requestCache.test.js         [T005]
+│   ├── forecastTransform.test.js    [T006]
+│   ├── forecastService.test.js      [T007]
+│   ├── overlaysService.test.js      [T008]
+│   └── unitConversions.test.js      [T009]
+├── integration/
+│   ├── ForecastView.test.jsx        [T016]
+│   ├── MapView.test.jsx             [T024]
+│   ├── OverlayFailureStates.test.jsx[T032]
+│   ├── App.test.jsx                 [T036, T038, T039, T041]
+│   └── Accessibility.test.jsx       [T039]
+└── e2e/
+    ├── forecast-view.spec.js        [T017, T040]
+    ├── map-view.spec.js             [T025, T040]
+    ├── map-overlays.spec.js         [T033]
+    └── comprehensive-flows.spec.js  [T037]
 ```
 
-### User Story 2
+---
 
-```text
-T019 + T020 + T021
-  -> T022
-  -> T023
-  -> T024
-```
+## Success Metrics Summary
 
-### User Story 3
+| # | Metric | Target | Verification |
+|---|--------|--------|--------------|
+| 1 | Forecast visible after tab switch | <3 sec | Manual timing on documented device |
+| 2 | Map visible after tab switch | <4 sec | Playwright perf test |
+| 3 | Unit toggle propagation | <500 ms | Playwright timing |
+| 4 | Mobile responsive | 375px+ | Integration test on viewport |
+| 5 | Test coverage (unit/integration) | >80% | Coverage reports |
+| 6 | Lighthouse accessibility | >90 | Automated check |
+| 7 | Happy-path API success rate | >95% | Test run statistics |
+| 8 | User comprehension (demo) | >90% | Classroom demo observation |
 
-```text
-T025 + T026 + T027
-  -> T028
-  -> T029
-  -> T030
-  -> T031
-```
+---
 
-## Implementation Strategy
+## Notes
 
-### MVP First
-
-- Complete T001-T018 to deliver the forecast experience as the first independently shippable increment.
-
-### Increment 2
-
-- Complete T019-T024 to add the interactive base map without overlays.
-
-### Increment 3
-
-- Complete T025-T031 to add overlays, legends, and point inspection.
-
-### Finalization
-
-- Complete T032-T036 to close compliance, diagnostics, measurement, accessibility, and styling gaps.
-
-## Summary
-
-| Metric | Value |
-|--------|-------|
-| Total task count | 36 |
-| Setup task count | 2 |
-| Foundational task count | 8 |
-| User Story 1 task count | 8 |
-| User Story 2 task count | 6 |
-| User Story 3 task count | 7 |
-| Polish task count | 5 |
-| Parallel opportunities identified | 21 tasks marked `[P]` |
-| Suggested MVP scope | T001-T018 |
-
-## Independent Test Criteria by Story
-
-- **US1**: Search for a location, open Forecast, verify daily and hourly forecast render and unit toggling updates the forecast.
-- **US2**: Search for a location, open Map, verify map centering, marker presence, and lazy initialization behavior.
-- **US3**: Open Map, switch overlays, verify legend changes, and inspect a clicked or tapped point.
+- **Configuration**: No environment variables or API keys are required. All services are keyless and CORS-safe.
+- **Dependencies**: Leaflet, React-Leaflet (added in Phase 1). No additional backend infrastructure.
+- **Caching**: In-memory Map + sessionStorage for forecast and point inspection; browser HTTP cache for tiles.
+- **Testing**: All unit/integration tests use Vitest + jsdom; e2e uses Playwright. Mock all external API calls in unit/integration; use real API in e2e.
+- **Browser Support**: Modern browsers (Chrome, Firefox, Safari, Edge). Graceful fallback for unsupported map features.
+- **Fallback Path**: MapFallbackSummary provides text alternative when Leaflet unavailable or browser unsupported.
