@@ -5,7 +5,7 @@
  */
 
 const MESSAGES = {
-  denied:      'Location access was denied — try entering a city name below.',
+  denied:      'Location access was denied. To enable: (1) Click the lock icon in your address bar, (2) Find "Location" and set to "Allow", (3) Refresh the page. Or search manually below.',
   timeout:     'Location request timed out — please enter your location below.',
   unavailable: 'Location is not available in this browser — please search manually.',
   unknown:     'Location could not be detected — please try searching by city name.',
