@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import SearchBar from './components/SearchBar'
 import LoadingSpinner from './components/LoadingSpinner'
 import ErrorMessage from './components/ErrorMessage'
@@ -9,11 +9,16 @@ import LocationPicker from './components/LocationPicker'
 import UnitToggle from './components/UnitToggle'
 import RecentSearches from './components/RecentSearches'
 import GeolocationDeniedNotice from './components/GeolocationDeniedNotice'
+import ResultsViewTabs from './components/ResultsViewTabs'
+import ForecastPanel from './components/ForecastPanel'
 import { useWeather } from './hooks/useWeather'
 import { useRecentSearches } from './hooks/useRecentSearches'
 import { useInitialLocation } from './hooks/useInitialLocation'
 
+const WeatherMapPanel = lazy(() => import('./components/WeatherMapPanel'))
+
 function App() {
+  const [activeView, setActiveView] = useState('current')
   const {
     isLoading,
     error,
@@ -137,13 +142,46 @@ function App() {
 
         {currentWeather ? (
           <div className="space-y-3">
-            <WeatherCard
-              weather={currentWeather}
-              location={selectedLocation}
-              unit={unitPreference}
-              source={selectedLocation?.source}
+            <ResultsViewTabs
+              activeView={activeView}
+              onChange={setActiveView}
+              availableViews={['current', 'forecast', 'map']}
             />
-            <WeatherStats weather={currentWeather} unit={unitPreference} />
+
+            {activeView === 'current' ? (
+              <div
+                id="results-panel-current"
+                role="tabpanel"
+                aria-labelledby="results-tab-current"
+                className="space-y-3"
+              >
+                <WeatherCard
+                  weather={currentWeather}
+                  location={selectedLocation}
+                  unit={unitPreference}
+                  source={selectedLocation?.source}
+                />
+                <WeatherStats weather={currentWeather} unit={unitPreference} />
+              </div>
+            ) : null}
+
+            {activeView === 'forecast' ? (
+              <ForecastPanel
+                location={selectedLocation}
+                unitPreference={unitPreference}
+                isActive={activeView === 'forecast'}
+              />
+            ) : null}
+
+            {activeView === 'map' ? (
+              <Suspense fallback={<LoadingSpinner message="Loading map view..." />}>
+                <WeatherMapPanel
+                  location={selectedLocation}
+                  unitPreference={unitPreference}
+                  isActive={activeView === 'map'}
+                />
+              </Suspense>
+            ) : null}
           </div>
         ) : null}
 
