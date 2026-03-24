@@ -15,8 +15,8 @@ Extend the existing static React weather app with two lazy-loaded result views a
 **Testing**: Vitest, jsdom, @testing-library/react, @testing-library/user-event, Playwright  
 **Target Platform**: Modern desktop and mobile browsers (Chrome, Firefox, Safari, Edge)  
 **Project Type**: Static single-page web application (SPA)  
-**Performance Goals**: Forecast view visible within 3 seconds after opening; map view visible within 4 seconds after opening; unit toggle propagation under 500ms; no map or overlay requests before the relevant view is opened  
-**Constraints**: No API keys or backend proxy; frontend-only integrations must remain CORS-safe; tabs and legends must be accessible; map must provide a non-map fallback path; requests timeout at 8 seconds; keep implementation simple enough for a course demo  
+**Performance Goals**: Forecast view visible within 3 seconds after opening; map view visible within 4 seconds after opening; unit toggle propagation under 500ms; no map or overlay requests before the relevant view is opened; verification timings must use one documented local browser/device baseline  
+**Constraints**: No API keys or backend proxy; frontend-only integrations must remain CORS-safe; tabs and legends must be accessible; map must provide a non-map fallback path; requests timeout at 8 seconds; forecast, map, and overlay failures must emit documented client-side diagnostic logs in development and test flows; keep implementation simple enough for a course demo  
 **Scale/Scope**: One existing SPA, approximately 6-8 new components, 2-3 hooks/service additions, and targeted integration plus end-to-end test expansion
 
 ## Constitution Check
@@ -29,11 +29,11 @@ Extend the existing static React weather app with two lazy-loaded result views a
 | II. Secure by Default | ✅ PASS (with justified exception — see Complexity Tracking) | No secrets are introduced; frontend-only integration is permitted for keyless, CORS-enabled public APIs |
 | III. Accessibility and Performance Baseline | ✅ PASS | Plan requires semantic tabs, keyboard support, text legends, and lazy loading to protect initial responsiveness |
 | IV. Testable Core Flows | ✅ PASS | Plan includes happy-path and failure-path automated coverage across integration and browser levels |
-| V. Operability and Simplicity | ✅ PASS | Single-project frontend extension, no backend, and quickstart/test commands remain straightforward |
+| V. Operability and Simplicity | ✅ PASS | Single-project frontend extension remains simple, and client-side failure diagnostics plus quickstart/test commands are explicitly documented |
 | Technical Baseline — frontend interface | ✅ PASS | Feature extends the existing React SPA with additional result views |
 | Technical Baseline — backend service endpoint | ✅ PASS | Constitution allows a frontend-only model for keyless public APIs; rationale documented below |
 | Technical Baseline — config in env vars / excluded from source control | ✅ PASS | No sensitive config is introduced |
-| Technical Baseline — repeatable local setup in README | ✅ PASS | Quickstart artifact documents complete local flow and verification steps |
+| Technical Baseline — repeatable local setup in README | ✅ PASS | Quickstart artifact documents complete local flow, diagnostic behavior, and verification steps |
 
 ## Project Structure
 
@@ -101,7 +101,9 @@ tests/
 │   ├── unitConversions.test.js
 │   ├── wmoConditions.test.js
 │   ├── forecastTransform.test.js        # New
-│   └── requestCache.test.js             # New
+│   ├── requestCache.test.js             # New
+│   ├── forecastService.test.js          # New
+│   └── overlaysService.test.js          # New
 ├── integration/
 │   ├── App.test.jsx
 │   ├── LocationSearch.test.jsx
@@ -138,10 +140,10 @@ Re-checked after Phase 1 artifacts (`research.md`, `data-model.md`, `contracts/`
 | II. Secure by Default | ✅ PASS (justified exception) | No secrets introduced; external requests stay keyless and frontend-safe |
 | III. Accessibility and Performance Baseline | ✅ PASS | Tabs, legends, and map fallback contracts encode keyboard and text alternatives; lazy loading prevents unnecessary view costs |
 | IV. Testable Core Flows | ✅ PASS | Data model and contracts map directly to unit, integration, and e2e coverage |
-| V. Operability and Simplicity | ✅ PASS | Quickstart uses the existing npm workflow and avoids new infrastructure |
+| V. Operability and Simplicity | ✅ PASS | Quickstart uses the existing npm workflow, documents diagnostic logging expectations, and avoids new infrastructure |
 | Technical Baseline — frontend interface | ✅ PASS | Design remains an SPA enhancement |
 | Technical Baseline — backend service endpoint | ✅ PASS | Frontend-only exception remains explicitly documented |
 | Technical Baseline — config in env vars | ✅ PASS | No environment secrets are needed |
-| Technical Baseline — repeatable local setup | ✅ PASS | Quickstart covers install, run, test, and manual verification |
+| Technical Baseline — repeatable local setup | ✅ PASS | Quickstart covers install, run, test, manual verification, and failure-diagnostics review |
 
-**Conclusion**: Plan passes all constitutional gates and is ready for `/speckit.tasks`.
+**Conclusion**: Plan passes all constitutional gates, is aligned with the generated task set, and is ready for implementation.

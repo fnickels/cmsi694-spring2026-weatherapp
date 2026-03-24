@@ -72,7 +72,7 @@ A user wants to see forecast data integrated with the map view by switching amon
 - What happens when a user's device or browser does not support interactive maps? — A fallback static map image or text-based location information is displayed.
 - What happens when the forecast API is slow or times out? — A loading indicator shows progress; if timeout occurs (>8 seconds), a friendly service-unavailable message is displayed with a retry option.
 - What happens when a user zooms to an extent that no map tiles are available? — Appropriate zoom limits are enforced; the map disables zoom at boundaries where tiles are unavailable.
-- What happens when the user searches for a location with multiple weather data sources or different regional data? — The system consistently uses the same weather data source for both forecast and map, ensuring data coherence.
+- What happens when the user views forecast and map data sourced from different regional providers? — The system labels forecast and overlay sources consistently, preserves clear layer attribution, and keeps displayed values tied to the selected location and time context so the experience remains coherent.
 - What happens on mobile devices with limited screen space? — The map and forecast are displayed in a stacked or multi-tab interface to avoid horizontal scroll; touch gestures (pinch-to-zoom) work on mobile.
 - What happens when forecast data extends beyond the API's available range? — The forecast displays only data that is available; the UI clearly indicates "Extended forecast not available beyond [date]".
 
@@ -94,7 +94,7 @@ A user wants to see forecast data integrated with the map view by switching amon
 - **FR-012**: Forecast data MUST load only when the user opens the forecast view, and map base data and overlay data MUST load only when the user opens the map view or selects a specific overlay.
 - **FR-013**: System MUST display a loading indicator while forecast or map data is being fetched.
 - **FR-014**: System MUST display clear, user-friendly error messages if forecast data or map cannot be loaded (e.g., data unavailable, service timeout, unsupported device).
-- **FR-015**: System MUST use free, open-access weather data sources that do not require API keys (e.g., Open-Meteo for forecast; OpenStreetMap or similar for maps).
+- **FR-015**: System MUST use free, open-access weather and map data sources that are publicly documented and legally usable in a browser-based educational project.
 - **FR-016**: The forecast and map UI components MUST be visually consistent with the existing application design (Tailwind CSS styling, color scheme, typography, and layout patterns).
 - **FR-017**: UI MUST be fully responsive and functional on desktop, tablet, and mobile screen sizes. On mobile with limited space, forecast and map views SHOULD be presented in a tab-based or stacked interface.
 - **FR-018**: System MUST not introduce external API keys or authentication requirements; all data sources MUST be accessible without credentials.
@@ -112,17 +112,17 @@ A user wants to see forecast data integrated with the map view by switching amon
 ### Measurable Outcomes
 
 - **SC-001**: Users can open the forecast view with a single click or tap after selecting a location and see a 7-day forecast plus 24-hour hourly breakdown.
-- **SC-002**: Extended forecast loads and displays within 3 seconds of becoming visible (measured from when user clicks forecast tab or view expands), ensuring responsive user experience.
-- **SC-003**: Interactive map loads and displays for selected location within 4 seconds of becoming visible, with zoom/pan controls immediately responsive.
-- **SC-004**: 95% of weather data requests for forecast and map succeed without service unavailability errors, as measured over monthly usage tracking.
+- **SC-002**: Extended forecast loads and displays within 3 seconds of becoming visible, measured during documented local verification on a standard desktop browser profile from forecast-tab activation to forecast content render.
+- **SC-003**: Interactive map loads and displays for the selected location within 4 seconds of becoming visible, measured during documented local verification on a standard desktop browser profile from map-tab activation to visible map render with responsive zoom and pan controls.
+- **SC-004**: During documented local test runs and manual verification sessions, at least 95% of forecast and map request attempts across the defined happy-path scenarios succeed without service-unavailability errors.
 - **SC-005**: All UI elements (forecast cards, map, layer controls) display correctly and remain aligned on screens as small as 375px width (mobile), with no horizontal scrolling required.
 - **SC-006**: Forecast and map features work on browsers/devices that support modern web standards (no requirement for specialized plugins or features); graceful fallback displayed for older browsers.
 - **SC-007**: Users can toggle between imperial/metric units once on the results page and see all forecast temperatures update within 500ms (perceived as instant).
-- **SC-008**: 90% of users (based on user feedback or task completion metrics) successfully navigate to and interpret the forecast and map views without additional guidance.
+- **SC-008**: In documented classroom-demo or manual usability checks with representative users, at least 90% can navigate to and interpret the forecast and map views without verbal guidance.
 
 ## Assumptions
 
-- **Data Source Choice**: Open-Meteo will continue to provide free weather forecast data without API keys and will maintain compatible API endpoints. If Open-Meteo becomes unavailable, a fallback to another free source (e.g., NOAA, Weather API free tier) is acceptable.
+- **Data Source Choice**: Open-Meteo will continue to provide free weather forecast data without API keys and will maintain compatible API endpoints. If Open-Meteo becomes unavailable, fallback providers must also be free, browser-accessible, CORS-compatible, and require no API key or authentication.
 - **Map Provider**: OpenStreetMap tiles via Leaflet.js or similar free, open-source map library will be used. No premium map service (Google Maps, Mapbox with tokens) will be required.
 - **Weather Layers**: Initial implementation will include precipitation, temperature, and cloud cover overlays in the first release. All three layers must remain compatible with free, no-key data sources.
 - **Data Caching**: Forecast, map, and overlay data may be cached locally during the user's session after the user opens the relevant view, reducing repeat API calls without preloading unused views.

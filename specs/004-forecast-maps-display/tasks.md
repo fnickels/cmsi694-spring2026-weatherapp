@@ -110,11 +110,11 @@
 
 **Purpose**: Close the remaining compliance, measurement, accessibility, responsiveness, and consistency work across all stories.
 
-- [ ] T032 [P] Document no-key external service usage and local verification steps in `README.md` and `specs/004-forecast-maps-display/quickstart.md`
-- [ ] T033 [P] Document measurement protocol for SC-002, SC-003, SC-004, and SC-008 in `README.md` and `specs/004-forecast-maps-display/quickstart.md`
+- [ ] T032 [P] Document no-key external service usage, local verification steps, and client-side failure-diagnostics expectations in `README.md` and `specs/004-forecast-maps-display/quickstart.md`
+- [ ] T033 [P] Document repeatable measurement protocol for SC-002 and SC-003 plus manual evaluation protocol for SC-004 and SC-008 in `README.md` and `specs/004-forecast-maps-display/quickstart.md`
 - [ ] T034 [P] Audit and fix responsive layout and keyboard behavior in `src/components/ResultsViewTabs.jsx`, `src/components/DailyForecastStrip.jsx`, `src/components/HourlyForecastPanel.jsx`, `src/components/WeatherMapPanel.jsx`, and `src/components/WeatherLayerLegend.jsx`
 - [ ] T035 [P] Apply existing visual styling and attribution requirements in `src/components/ForecastPanel.jsx`, `src/components/WeatherMapPanel.jsx`, `src/components/WeatherMapCanvas.jsx`, and `src/components/MapFallbackSummary.jsx`
-- [ ] T036 Verify shared loading and error presentation reuse existing components in `src/components/ForecastPanel.jsx`, `src/components/WeatherMapPanel.jsx`, `tests/integration/ForecastView.test.jsx`, and `tests/integration/MapView.test.jsx`
+- [ ] T036 Verify shared loading, error presentation, and client-side failure diagnostics in `src/components/ForecastPanel.jsx`, `src/components/WeatherMapPanel.jsx`, `src/services/forecast.js`, `src/services/overlays.js`, `tests/integration/ForecastView.test.jsx`, and `tests/integration/MapView.test.jsx`
 
 ---
 
@@ -192,7 +192,7 @@ T025 + T026 + T027
 
 ### Finalization
 
-- Complete T032-T036 to close compliance, measurement, accessibility, and styling gaps.
+- Complete T032-T036 to close compliance, diagnostics, measurement, accessibility, and styling gaps.
 
 ## Summary
 
