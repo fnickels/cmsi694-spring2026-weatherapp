@@ -6,6 +6,21 @@
 const GEOCODING_API_URL = 'https://geocoding-api.open-meteo.com/v1/search'
 const REVERSE_GEOCODING_API_URL = 'https://geocoding-api.open-meteo.com/v1/reverse'
 const TIMEOUT_MS = 8000
+const CITY_FEATURE_CODES = new Set([
+  'PPL',
+  'PPLA',
+  'PPLA2',
+  'PPLA3',
+  'PPLA4',
+  'PPLC',
+  'PPLG',
+  'PPLL',
+  'PPLQ',
+  'PPLR',
+  'PPLS',
+  'PPLW',
+  'PPLX',
+])
 
 /**
  * Search for locations by name
@@ -95,7 +110,7 @@ export async function reverseGeocodeLocation(latitude, longitude) {
     const params = new URLSearchParams({
       latitude: latitude.toString(),
       longitude: longitude.toString(),
-      count: 1,
+      count: 10,
       language: 'en',
       format: 'json'
     })
@@ -123,7 +138,7 @@ export async function reverseGeocodeLocation(latitude, longitude) {
       return null
     }
 
-    const result = data.results[0]
+    const result = pickClosestCityResult(data.results, latitude, longitude)
 
     return {
       id: result.id ?? `${latitude},${longitude}`,
@@ -145,6 +160,42 @@ export async function reverseGeocodeLocation(latitude, longitude) {
     }
     throw error
   }
+}
+
+function pickClosestCityResult(results, latitude, longitude) {
+  const cityCandidates = results.filter((result) => isCityLikeResult(result))
+  const candidates = cityCandidates.length > 0 ? cityCandidates : results
+
+  return candidates.reduce((closest, candidate) => {
+    if (!closest) {
+      return candidate
+    }
+
+    const closestDistance = coordinateDistanceSquared(closest, latitude, longitude)
+    const candidateDistance = coordinateDistanceSquared(candidate, latitude, longitude)
+
+    return candidateDistance < closestDistance ? candidate : closest
+  }, null)
+}
+
+function isCityLikeResult(result) {
+  const featureCode = typeof result.feature_code === 'string'
+    ? result.feature_code.toUpperCase()
+    : ''
+  return CITY_FEATURE_CODES.has(featureCode)
+}
+
+function coordinateDistanceSquared(result, latitude, longitude) {
+  const resultLat = Number(result.latitude)
+  const resultLon = Number(result.longitude)
+
+  if (Number.isNaN(resultLat) || Number.isNaN(resultLon)) {
+    return Number.POSITIVE_INFINITY
+  }
+
+  const latDiff = resultLat - latitude
+  const lonDiff = resultLon - longitude
+  return (latDiff * latDiff) + (lonDiff * lonDiff)
 }
 
 /**
