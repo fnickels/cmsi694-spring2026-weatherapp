@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-function SearchBar({ onSearch, onUseMyLocation, isLoading, geolocationLoading, helperMessage }) {
+function SearchBar({ onSearch, onUseMyLocation, searchLoading = false, geolocationLoading = false, helperMessage }) {
   const [query, setQuery] = useState('')
   const [localHelper, setLocalHelper] = useState('')
 
@@ -24,10 +24,10 @@ function SearchBar({ onSearch, onUseMyLocation, isLoading, geolocationLoading, h
           className="input-field"
           placeholder="Search city or town"
           aria-label="Location search"
-          disabled={isLoading || geolocationLoading}
+          disabled={searchLoading}
         />
-        <button type="submit" className="btn-primary" disabled={isLoading || geolocationLoading}>
-          {isLoading ? 'Searching...' : 'Search'}
+        <button type="submit" className="btn-primary" disabled={searchLoading}>
+          {searchLoading ? 'Searching...' : 'Search'}
         </button>
       </div>
       <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
@@ -35,7 +35,7 @@ function SearchBar({ onSearch, onUseMyLocation, isLoading, geolocationLoading, h
           type="button"
           className="btn-secondary"
           onClick={onUseMyLocation}
-          disabled={isLoading || geolocationLoading}
+          disabled={geolocationLoading}
         >
           {geolocationLoading ? 'Locating...' : 'Use My Location'}
         </button>

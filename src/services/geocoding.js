@@ -4,6 +4,7 @@
  */
 
 const GEOCODING_API_URL = 'https://geocoding-api.open-meteo.com/v1/search'
+const REVERSE_GEOCODING_API_URL = 'https://geocoding-api.open-meteo.com/v1/reverse'
 const TIMEOUT_MS = 8000
 
 /**
@@ -68,6 +69,77 @@ export async function searchLocations(query) {
       throw new Error('Geolocation request timed out. Please try again.')
     }
     // Network errors, malformed response, etc.
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('Network error. Please check your internet connection.')
+    }
+    throw error
+  }
+}
+
+/**
+ * Resolve a human-readable place from coordinates.
+ * @param {number} latitude - Latitude coordinate
+ * @param {number} longitude - Longitude coordinate
+ * @returns {Promise<Object|null>} Best matching location or null when no place is found
+ * @throws {Error} If API call fails or times out
+ */
+export async function reverseGeocodeLocation(latitude, longitude) {
+  if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+    return null
+  }
+
+  try {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS)
+
+    const params = new URLSearchParams({
+      latitude: latitude.toString(),
+      longitude: longitude.toString(),
+      count: 1,
+      language: 'en',
+      format: 'json'
+    })
+
+    const response = await fetch(
+      `${REVERSE_GEOCODING_API_URL}?${params.toString()}`,
+      {
+        method: 'GET',
+        signal: controller.signal,
+        headers: {
+          Accept: 'application/json'
+        }
+      }
+    )
+
+    clearTimeout(timeoutId)
+
+    if (!response.ok) {
+      throw new Error(`Reverse geocoding API error: ${response.status}`)
+    }
+
+    const data = await response.json()
+
+    if (!data.results || !Array.isArray(data.results) || data.results.length === 0) {
+      return null
+    }
+
+    const result = data.results[0]
+
+    return {
+      id: result.id ?? `${latitude},${longitude}`,
+      name: result.name || 'Your Location',
+      latitude,
+      longitude,
+      country: result.country || '',
+      countryCode: result.country_code || '',
+      admin1: result.admin1 || null,
+      displayName: formatDisplayName(result) || 'Location (approximate)',
+      approximate: false,
+    }
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error('Reverse geocoding request timed out. Please try again.')
+    }
     if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new Error('Network error. Please check your internet connection.')
     }

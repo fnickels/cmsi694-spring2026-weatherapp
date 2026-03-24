@@ -6,10 +6,22 @@ import App from '../../src/App'
 
 vi.mock('../../src/services/geocoding', () => ({
   searchLocations: vi.fn(),
+  reverseGeocodeLocation: vi.fn(),
 }))
 
 vi.mock('../../src/services/weather', () => ({
   fetchWeather: vi.fn(),
+}))
+
+// Disable auto-detect so a11y checks are not affected by first-load geolocation behavior.
+vi.mock('../../src/hooks/useInitialLocation', () => ({
+  useInitialLocation: vi.fn(() => ({
+    context: {
+      attempted: false, granted: false, denied: false, timedOut: false,
+      unavailable: false, userManuallySelected: false, coordinates: null, error: null,
+    },
+    markUserManuallySelected: vi.fn(),
+  })),
 }))
 
 import { searchLocations } from '../../src/services/geocoding'

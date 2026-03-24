@@ -5,6 +5,7 @@ import App from '../../src/App'
 
 vi.mock('../../src/services/geocoding', () => ({
   searchLocations: vi.fn(),
+  reverseGeocodeLocation: vi.fn(),
 }))
 
 vi.mock('../../src/services/weather', () => ({

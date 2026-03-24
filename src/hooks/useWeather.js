@@ -5,7 +5,7 @@
  */
 
 import { useState, useCallback } from 'react'
-import { searchLocations } from '../services/geocoding'
+import { reverseGeocodeLocation, searchLocations } from '../services/geocoding'
 import { fetchWeather } from '../services/weather'
 
 export function useWeather() {
@@ -15,6 +15,33 @@ export function useWeather() {
   const [selectedLocation, setSelectedLocation] = useState(null)
   const [disambiguationList, setDisambiguationList] = useState([])
   const [unitPreference, setUnitPreference] = useState('imperial')
+
+  const buildDetectedLocation = useCallback(async ({ latitude, longitude }, source) => {
+    try {
+      const resolvedLocation = await reverseGeocodeLocation(latitude, longitude)
+
+      if (resolvedLocation) {
+        return source
+          ? { ...resolvedLocation, source }
+          : resolvedLocation
+      }
+    } catch {
+      // Fallback to an approximate label so weather can still render.
+    }
+
+    return {
+      id: Date.now(),
+      name: 'Your Location',
+      displayName: 'Location (approximate)',
+      latitude,
+      longitude,
+      country: '',
+      countryCode: '',
+      admin1: null,
+      approximate: true,
+      ...(source ? { source } : {}),
+    }
+  }, [])
 
   const search = useCallback(async (query) => {
     if (!query || query.trim().length === 0) {
@@ -83,18 +110,14 @@ export function useWeather() {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         try {
-          const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || ''
-          const cityGuess = timezone.split('/').pop()?.replaceAll('_', ' ') || 'Your Location'
-          const location = {
-            id: Date.now(),
-            name: cityGuess,
-            displayName: cityGuess,
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            country: '',
-            countryCode: '',
-            admin1: null,
-          }
+          const location = await buildDetectedLocation(
+            {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            },
+            'manual'
+          )
+
           setSelectedLocation(location)
           await fetchWeatherForLocation(location)
         } catch (err) {
@@ -112,7 +135,32 @@ export function useWeather() {
       },
       { timeout: 8000, enableHighAccuracy: true }
     )
-  }, [])
+  }, [buildDetectedLocation])
+
+  /**
+   * Auto-detect path: called by App when useInitialLocation resolves coordinates.
+   * Resolves a human-readable label when possible and falls back to an approximate
+   * location name so first-load weather still renders.
+   */
+  const fetchWeatherByCoordinates = useCallback(async ({ latitude, longitude }) => {
+    setIsLoading(true)
+    setError(null)
+    setDisambiguationList([])
+    setCurrentWeather(null)
+
+    try {
+      const location = await buildDetectedLocation(
+        { latitude, longitude },
+        'auto-detected'
+      )
+
+      setSelectedLocation(location)
+      await fetchWeatherForLocation(location)
+    } catch (err) {
+      setError(err.message || 'Failed to fetch weather for your location')
+      setIsLoading(false)
+    }
+  }, [buildDetectedLocation])
 
   const toggleUnits = useCallback(() => {
     setUnitPreference((prev) => (prev === 'imperial' ? 'metric' : 'imperial'))
@@ -151,6 +199,7 @@ export function useWeather() {
     search,
     selectLocation,
     requestGeolocation,
+    fetchWeatherByCoordinates,
     toggleUnits,
     setUnitPreference,
   }

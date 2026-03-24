@@ -19,8 +19,9 @@ App runs at http://localhost:5173.
 ## Geolocation Requirements
 
 - Geolocation works on `localhost` during local development.
-- In deployed environments, geolocation requires HTTPS.
-- If location access is denied or unavailable, use manual city search.
+- In deployed environments, geolocation **requires HTTPS** — the browser will not expose location data over plain HTTP.
+- On first visit, the site automatically requests your location and loads local weather. Allow the browser prompt to see instant results.
+- If location access is denied or unavailable, a notice is shown and you can still search by city name manually.
 
 ## Testing
 

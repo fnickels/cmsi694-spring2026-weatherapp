@@ -33,7 +33,8 @@ export async function fetchWeather(latitude, longitude, unit = 'metric') {
       current: 'temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,visibility',
       temperature_unit: 'celsius',
       wind_speed_unit: 'kmh',
-      forecast_days: 1
+      forecast_days: 1,
+      timezone: 'auto'
     })
 
     const response = await fetch(
@@ -67,6 +68,7 @@ export async function fetchWeather(latitude, longitude, unit = 'metric') {
     const weather = {
       locationId: null, // Will be set by caller
       observationTime: current.time || new Date().toISOString(),
+      timezone: data.timezone || null,
       temperatureC: current.temperature_2m,
       feelsLikeC: current.apparent_temperature,
       humidity: current.relative_humidity_2m,
