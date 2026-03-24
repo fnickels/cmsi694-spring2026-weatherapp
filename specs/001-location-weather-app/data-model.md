@@ -13,18 +13,20 @@ This is a fully client-side application. There is no database. All entities belo
 
 ## Entity: Location
 
-**What it represents**: A resolved geographic place returned by the Open-Meteo Geocoding API.
+**What it represents**: A resolved geographic place returned by OpenWeather direct or reverse geocoding.
 
 ```ts
 {
-  id: number            // Open-Meteo geocoding result ID (unique per place)
+  id: string            // Derived from coordinates, e.g. "41.85003,-87.65005"
   name: string          // City/place name (e.g., "Chicago")
   latitude: number      // Decimal degrees
   longitude: number     // Decimal degrees
-  country: string       // Full country name (e.g., "United States")
-  countryCode: string   // ISO 3166-1 alpha-2 (e.g., "US")
+  country: string       // Country name or ISO country code, depending on provider response
+  countryCode: string   // ISO 3166-1 alpha-2 when available; empty string otherwise
   admin1: string | null // State/Province/Region (e.g., "Illinois") — null if unavailable
   displayName: string   // Computed: "{name}, {admin1}, {country}" or "{name}, {country}"
+  approximate?: boolean // Present when reverse geocoding fails and a fallback label is used
+  source?: "manual" | "auto-detected"
 }
 ```
 
@@ -50,7 +52,7 @@ null
 
 ```ts
 {
-  locationId: number       // Foreign key to Location.id (used for cache keying)
+  locationId: string       // Foreign key to Location.id (used for cache keying)
   observationTime: string  // ISO 8601 datetime string (e.g., "2026-03-17T14:00")
   temperatureC: number     // Temperature in Celsius (always stored in Celsius; converted for display)
   feelsLikeC: number       // Apparent temperature in Celsius
@@ -121,7 +123,7 @@ null
 
 ```ts
 {
-  id: number         // Location.id — used as stable key
+  id: string         // Location.id — used as stable key
   displayName: string  // Location.displayName (snapshot at time of search)
   latitude: number
   longitude: number

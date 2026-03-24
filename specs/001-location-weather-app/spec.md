@@ -33,7 +33,7 @@ A visitor arrives at the website and chooses to get weather for their current ph
 
 **Acceptance Scenarios**:
 
-1. **Given** the user visits the site on a device with location services available, **When** they click the "Use My Location" button, **Then** the browser requests location permission, and upon approval, current weather for the detected location is displayed.
+1. **Given** the user visits the site on a device with location services available, **When** they click the "Use My Location" button, **Then** the browser requests location permission, and upon approval, current weather for the detected coordinates is displayed using the nearest reverse-geocoded place label when available.
 2. **Given** the user is prompted for location permission, **When** they deny it, **Then** a non-intrusive message is shown explaining that auto-detection requires permission, and the search input is highlighted as an alternative.
 3. **Given** geolocation is not available (older browser or no GPS), **When** the user attempts to use auto-detect, **Then** a friendly message is shown suggesting manual location entry.
 
@@ -90,14 +90,14 @@ A returning visitor or a user who has already searched for a location during the
 - **FR-002**: System MUST display the following weather facts for any successfully retrieved location: current temperature, "feels-like" temperature, weather condition label (e.g., "Partly Cloudy"), humidity percentage, wind speed and direction (displayed as cardinal or intercardinal labels: N, NE, E, SE, S, SW, W, NW), and visibility.
 - **FR-003**: System MUST display a visual weather condition indicator (icon or illustration) that represents the current condition (e.g., sun, clouds, rain).
 - **FR-004**: System MUST display the resolved location name and the date and time of the weather observation for context.
-- **FR-005**: System MUST provide a "Use My Location" button that triggers browser geolocation to auto-populate weather for the user's current position. For auto-detected locations, the system SHOULD show a human-readable label derived from timezone data or fall back to "Your Location" if city naming is unavailable.
+- **FR-005**: System MUST provide a "Use My Location" button that triggers browser geolocation to auto-populate weather for the user's current position. For auto-detected locations, the system MUST attempt reverse geocoding through OpenWeather's Geocoding API to resolve the nearest human-readable place label and MUST fall back to `Location (approximate)` when no reliable place name is returned.
 - **FR-006**: Users MUST be able to toggle between imperial units (°F, mph) and metric units (°C, km/h), with all displayed weather values updating immediately.
 - **FR-007**: System MUST present a disambiguation list when a location name matches multiple places, allowing the user to select the intended one.
 - **FR-008**: System MUST display clear, user-friendly error messages and distinguish at minimum these cases: location not found (empty geocoding results), service unavailable (5xx/timeout/network failure), and geolocation permission denied.
 - **FR-009**: System MUST show a loading indicator while weather data is being fetched.
 - **FR-010**: System MUST retain up to 5 recently searched locations within the current session and display them as quick-access shortcuts near the search field.
 - **FR-011**: The site MUST be fully usable on desktop, tablet, and mobile screen sizes with a responsive, modern visual design, built using React (Vite) and Tailwind CSS.
-- **FR-012**: System MUST use Open-Meteo as the weather data provider. Because Open-Meteo requires no API key, no credentials are stored or transmitted — the site is a fully static frontend with no server-side component required.
+- **FR-012**: System MUST use Open-Meteo as the weather data provider and OpenWeather Geocoding API for direct and reverse geocoding. The geocoding integration MUST read `VITE_OPENWEATHER_API_KEY` from local environment configuration, and that value MUST be excluded from source control.
 - **FR-013**: The site MUST meet WCAG 2.1 AA accessibility standards: all interactive elements (search field, buttons, toggles, disambiguation list) MUST be keyboard navigable; text and UI elements MUST meet a minimum contrast ratio of 4.5:1; all non-decorative images and icons MUST have descriptive `alt` text or ARIA labels.
 - **FR-014**: The site MUST follow a dark glassmorphism / deep sky visual theme: a dark gradient background using sky-blue-to-navy tones, weather data displayed in frosted-glass (backdrop-blur) cards with white or light text, and a cohesive atmospheric aesthetic throughout.
 - **FR-015**: The site MUST be runnable locally via `npm run dev` with no external hosting, server, or deployment configuration required. A production build (`npm run build`) MUST produce a deployable static artifact, but deployment is out of scope.
@@ -126,7 +126,7 @@ A returning visitor or a user who has already searched for a location during the
 
 ### Session 2026-03-17
 
-- Q: What weather data source and API key architecture will be used? → A: Open-Meteo (no API key required) — fully static frontend, no server needed
+- Q: What weather and geocoding data source architecture will be used? → A: Open-Meteo for weather + OpenWeather for direct/reverse geocoding, with `VITE_OPENWEATHER_API_KEY` configured locally in the static frontend
 - Q: What frontend technology stack will be used? → A: React (Vite) + Tailwind CSS
 - Q: What accessibility standard must the site meet? → A: WCAG 2.1 AA
 - Q: What visual aesthetic direction should the site follow? → A: Dark glassmorphism / deep sky theme — dark gradient background (sky blues/navy), frosted-glass weather cards, white text
@@ -135,8 +135,8 @@ A returning visitor or a user who has already searched for a location during the
 
 ## Assumptions
 
-- Weather data is sourced from **Open-Meteo** (open-meteo.com), a free, key-free weather API that requires no registration or credentials. The site is a fully static frontend with no backend proxy.
-- The frontend is built with **React (Vite)** as the component framework and **Tailwind CSS** for styling. No other UI component library is assumed unless added during planning.
+- Weather data is sourced from **Open-Meteo** (open-meteo.com), while direct and reverse geocoding are sourced from **OpenWeather** geocoding endpoints. The site remains a fully static frontend with no backend proxy.
+- The frontend is built with **React (Vite)** as the component framework and **Tailwind CSS** for styling. OpenWeather geocoding requires a locally configured `VITE_OPENWEATHER_API_KEY` that is available to the Vite client bundle during development and testing.
 - The visual aesthetic is **dark glassmorphism / deep sky**: a dark sky-blue-to-navy gradient background, frosted-glass weather cards (`backdrop-blur`), and white text throughout. Weather condition icons use a consistent open-license icon set (e.g., Meteocons or similar).
 - "Basic current weather facts" is interpreted as: temperature, feels-like temperature, humidity, wind speed and direction, weather condition description, and visibility — not forecasts, historical data, radar, or air quality.
 - The site is intended as a publicly accessible web application requiring no user accounts or authentication.

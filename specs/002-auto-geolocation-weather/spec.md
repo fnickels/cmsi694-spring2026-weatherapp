@@ -69,7 +69,7 @@ As a visitor, I want to change the location after any automatic load so I can vi
 
 ### Edge Cases
 
-- Location retrieval takes too long: the site should stop waiting after a reasonable delay and continue with manual search mode.
+- Location retrieval takes too long: the site should stop waiting after 5 seconds and continue with manual search mode.
 - Browser returns coordinates but weather data cannot be retrieved: the site should show a clear service failure message and allow retry.
 - Visitor blocks location prompts at the browser level: the site should not repeatedly interrupt with additional prompts during that page visit.
 - Detected location is imprecise or mapped to a nearby city: results should still render with a clear location label so users can decide whether to search manually.
@@ -80,7 +80,7 @@ As a visitor, I want to change the location after any automatic load so I can vi
 
 ### Functional Requirements
 
-- **FR-001**: On first page load, the system MUST attempt to determine the visitor's current location using browser-provided location data when that capability is available. Location requests MUST time out after 8 seconds if no response is received; on timeout, the system falls back to manual search mode.
+- **FR-001**: On first page load, the system MUST attempt to determine the visitor's current location using browser-provided location data when that capability is available. Location requests MUST time out after 5 seconds if no response is received; on timeout, the system falls back to manual search mode.
 - **FR-002**: When location access is granted and coordinates are successfully obtained, the system MUST automatically request and display weather data for that detected location without requiring manual input.
 - **FR-003**: The system MUST clearly label weather results that were loaded from auto-detected location. This label MUST appear near the displayed location name (e.g., as a badge, icon, or text indicator such as "Detected" or "Auto-located") to make the automatic detection behavior visible and trustworthy.
 - **FR-004**: If location permission is denied, unavailable, or times out, the system MUST keep the page fully functional and present a clear fallback message that directs users to manual location entry.
@@ -93,6 +93,7 @@ As a visitor, I want to change the location after any automatic load so I can vi
 - **FR-011**: The weather card MUST display detected coordinates in a readable format (`Latitude` and `Longitude` with hemisphere indicators) whenever numeric coordinates are available.
 - **FR-012**: The weather card MUST display the location's local time label as "Location's Local Time" and include both a short timezone code (for example `PDT`) and IANA timezone identifier when available.
 - **FR-013**: The "Coordinates fall within" line MUST only be shown when a meaningful city is not available; the system MUST derive alternate area context from state/country first, then timezone-derived area, and then coordinate hemisphere zone as a final fallback.
+- **FR-014**: When coordinates are successfully obtained, the system MUST attempt reverse geocoding through OpenWeather's Geocoding API to resolve the nearest available place label. If reverse geocoding fails, the system MUST render the detected result as `Location (approximate)` rather than blocking weather display.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -123,3 +124,4 @@ As a visitor, I want to change the location after any automatic load so I can vi
 - Browser geolocation capability is available to request device location and return permission outcomes.
 - Existing weather retrieval capability can consume detected location data and return current weather.
 - Network access is available for retrieving weather data after location is resolved.
+- `VITE_OPENWEATHER_API_KEY` is configured locally so reverse geocoding can run in development and test environments.

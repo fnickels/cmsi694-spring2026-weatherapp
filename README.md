@@ -6,6 +6,8 @@ Location-based current weather web app built with React + Vite.
 
 ```bash
 npm install
+cp .env.example .env.local
+# set VITE_OPENWEATHER_API_KEY in .env.local
 ```
 
 ## Running Locally
@@ -15,6 +17,12 @@ npm run dev
 ```
 
 App runs at http://localhost:5173.
+
+## Environment
+
+- `VITE_OPENWEATHER_API_KEY` is required for direct geocoding and reverse geocoding.
+- Weather data still comes from Open-Meteo and does not require a separate key.
+- `.env.local` should remain uncommitted.
 
 ## Geolocation Requirements
 
@@ -46,7 +54,11 @@ App runs at http://localhost:5173.
 - RainViewer: precipitation overlay metadata and tiles
 - NASA GIBS: temperature and cloud-cover overlay imagery
 
-No API keys, tokens, or backend proxy are required.
+### API-Key External Services
+
+- OpenWeather: direct geocoding and reverse geocoding via `VITE_OPENWEATHER_API_KEY`
+
+No backend proxy is required.
 
 ### Client-side Diagnostics
 

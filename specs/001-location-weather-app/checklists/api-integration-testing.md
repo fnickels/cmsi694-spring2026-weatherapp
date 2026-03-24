@@ -10,19 +10,19 @@
 ## Requirement Completeness — API Contracts
 
 - [x] CHK001 Are both required external APIs documented with full request/response shapes? (Geocoding + Weather) [Completeness, Spec §FR-012, Contracts §1–2]
-- [x] CHK002 Is the Geocoding API's empty response case (missing `results` key) explicitly handled in requirements? [Completeness, Contracts §1]
+- [x] CHK002 Is the Geocoding API's empty response case (`[]` from OpenWeather direct/reverse geocoding) explicitly handled in requirements? [Completeness, Contracts §1]
 - [x] CHK003 Are all required query parameters for the Weather API documented with valid value ranges? [Completeness, Contracts §2]
 - [x] CHK004 Is visibility unit conversion requirement documented (metres → miles/km client-side)? [Completeness, Contracts §2, Research §2]
 - [x] CHK005 Are rate limits and fair-use policies documented for Open-Meteo free tier? [Completeness, Contracts §3]
 - [x] CHK006 Is the CORS enablement status confirmed for both APIs? [Completeness, Contracts Intro]
 - [x] CHK007 Are HTTP error response codes (4xx, 5xx) explicitly mapped to application error states (FR-008)? [Completeness, Contracts §1–2]
-- [x] CHK008 Is the "no API key" architectural decision explicitly documented and justified? [Completeness, FR-012, Research §1–2]
+- [x] CHK008 Is the OpenWeather API key requirement explicitly documented, excluded from source control, and justified in the architecture? [Completeness, FR-012, Research §1–2]
 
 ## Requirement Clarity — API Behavior
 
-- [x] CHK009 Is the geolocation-to-weather flow clearly specified (no intermediate geocoding step)? [Clarity, FR-005]
+- [x] CHK009 Is the geolocation-to-weather flow clearly specified (browser geolocation → OpenWeather reverse geocoding → weather fetch)? [Clarity, FR-005]
 - [x] CHK010 For ambiguous locations (multiple geocoding results), is the selection flow unambiguous (present list → user picks → fetch weather)? [Clarity, FR-007]
-- [x] CHK011 Are timezone handling requirements specified for auto-detected locations? [Clarity, FR-005 + Research §7]
+- [x] CHK011 Are reverse-geocoding and fallback labeling requirements specified for auto-detected locations? [Clarity, FR-005 + Research §7]
 - [x] CHK012 Is the unit toggle behavior specified as client-side conversion with no network request? [Clarity, SC-004, Research §2]
 - [x] CHK013 Can "service unavailable" (FR-008) be objectively distinguished from "location not found" in error handling? [Clarity, FR-008]
 - [x] CHK014 Is the visibility unit handling unambiguous (always metres from API, client conversion required)? [Clarity, Research §2]
@@ -54,7 +54,7 @@
 - [x] CHK031 Is very slow or no connectivity handled with loading indicator + timeout? [Coverage, Edge Case, FR-009]
 - [x] CHK032 When Weather API returns metres for visibility, is client-side conversion to miles/km tested? [Coverage, Edge Case, Research §2]
 - [x] CHK033 Are WMO codes outside the documented 27 buckets handled gracefully (unknown → fallback label + icon)? [Coverage, Edge Case, Research §3]
-- [x] CHK034 Is geolocation returning coordinates with no nearby named location handled (use timezone parsing or "Your Location" label)? [Coverage, Edge Case, Research §7]
+- [x] CHK034 Is geolocation returning coordinates with no nearby named location handled (use `Location (approximate)` plus area fallback details)? [Coverage, Edge Case, Research §7]
 - [x] CHK035 Is the case where the Geocoding API succeeds but Weather API fails handled (show error, don't display incomplete data)? [Coverage, Failure Path]
 
 ## Error Handling & Resilience
@@ -74,8 +74,8 @@
 
 ## Dependencies & Assumptions — API Layer
 
-- [x] CHK045 Are Open-Meteo endpoint URLs pinned to specific API versions (`/v1/search`, `/v1/forecast`)? [Assumption, Contracts Intro]
-- [x] CHK046 Is the assumption that Open-Meteo remains free and CORS-enabled documented? [Assumption, Research §1–2]
+- [x] CHK045 Are provider endpoint URLs pinned to specific API versions (`/geo/1.0/direct`, `/geo/1.0/reverse`, `/v1/forecast`)? [Assumption, Contracts Intro]
+- [x] CHK046 Are the assumptions about OpenWeather geocoding auth plus Open-Meteo weather availability/CORS documented? [Assumption, Research §1–2]
 - [x] CHK047 Is Meteocons icon licensing (MIT) and availability documented for integration? [Assumption, Research §4]
 - [x] CHK048 Are any undocumented dependencies on browser APIs (Geolocation, sessionStorage, Intl) listed? [Completeness, Research §7]
 

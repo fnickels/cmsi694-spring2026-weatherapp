@@ -1,84 +1,111 @@
-# Contract: Open-Meteo External APIs
+# Contract: External Weather and Geocoding APIs
 
 **Branch**: `001-location-weather-app` | **Date**: 2026-03-17  
 **Source**: [research.md](../research.md) §1 & §2  
-**API Base**: `https://geocoding-api.open-meteo.com` and `https://api.open-meteo.com`  
-**Auth**: None required (no API key)  
-**CORS**: Fully CORS-enabled — calls may be made directly from browser JavaScript
+**API Base**: `https://api.openweathermap.org` and `https://api.open-meteo.com`  
+**Auth**: OpenWeather geocoding requires `VITE_OPENWEATHER_API_KEY`; Open-Meteo weather requires no auth  
+**CORS**: Browser-direct requests are used for both providers
 
 ---
 
-## API 1: Geocoding — Search by Name
+## API 1: OpenWeather Geocoding — Search by Name
 
 Resolves a free-text location name to one or more `Location` records.
 
 ### Request
 
 ```
-GET https://geocoding-api.open-meteo.com/v1/search
+GET https://api.openweathermap.org/geo/1.0/direct
 ```
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `name` | string | yes | City name, postal code, or place name |
-| `count` | integer | no | Max results to return (default: 10, max: 100) |
-| `language` | string | no | Response language (use `en`) |
-| `format` | string | no | Response format (`json`) |
+| `q` | string | yes | City name or place name |
+| `limit` | integer | no | Max results to return (implementation uses `5`) |
+| `appid` | string | yes | OpenWeather API key from `VITE_OPENWEATHER_API_KEY` |
 
 **Example**:
 ```
-GET https://geocoding-api.open-meteo.com/v1/search?name=Chicago&count=10&language=en&format=json
+GET https://api.openweathermap.org/geo/1.0/direct?q=Chicago&limit=5&appid={VITE_OPENWEATHER_API_KEY}
 ```
 
 ### Success Response — `200 OK`
 
 ```json
-{
-  "results": [
-    {
-      "id": 4887398,
-      "name": "Chicago",
-      "latitude": 41.85003,
-      "longitude": -87.65005,
-      "elevation": 179.0,
-      "feature_code": "PPLA2",
-      "country_code": "US",
-      "admin1_id": 4896861,
-      "admin2_id": 4888671,
-      "timezone": "America/Chicago",
-      "population": 2720546,
-      "country_id": 6252001,
-      "country": "United States",
-      "admin1": "Illinois",
-      "admin2": "Cook County"
-    }
-  ],
-  "generationtime_ms": 0.9
-}
+[
+  {
+    "name": "Chicago",
+    "lat": 41.85003,
+    "lon": -87.65005,
+    "country": "US",
+    "state": "Illinois"
+  }
+]
 ```
 
-**Fields used by the app**: `id`, `name`, `latitude`, `longitude`, `country`, `countryCode`, `admin1`  
-**Mapping note**: Raw API field `country_code` is mapped to internal model field `countryCode`.  
-**Fields ignored**: `elevation`, `feature_code`, `admin1_id`, `admin2_id`, `population`, `country_id`, `admin2`, `generationtime_ms`
+**Fields used by the app**: `name`, `lat`, `lon`, `country`, `state`  
+**Mapping note**: `lat`/`lon` are mapped to internal `latitude`/`longitude`; `state` is mapped to `admin1`; `id` is synthesized from coordinates.
 
 ### Empty Response (location not found)
 
 ```json
-{
-  "generationtime_ms": 0.9
-}
+[]
 ```
-
-> `results` key is absent (not `[]`). Application code MUST handle missing `results` as "no results found."
 
 ### Error Response
 
-HTTP 5xx or network failure — no structured error body guaranteed.  
-Application MUST catch fetch errors and display FR-008 error message.
+OpenWeather returns structured errors for invalid credentials, for example:
+
+```json
+{
+  "cod": 401,
+  "message": "Invalid API key. Please see https://openweathermap.org/faq#error401 for more info."
+}
+```
+
+Application MUST catch fetch/auth errors and display FR-008 error messaging.
+
+## API 1b: OpenWeather Geocoding — Reverse by Coordinates
+
+Resolves latitude/longitude to a nearby place label used by geolocation flows.
+
+### Request
+
+```
+GET https://api.openweathermap.org/geo/1.0/reverse
+```
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `lat` | number | yes | Decimal degrees (-90 to 90) |
+| `lon` | number | yes | Decimal degrees (-180 to 180) |
+| `limit` | integer | no | Max results to return (implementation uses `10`) |
+| `appid` | string | yes | OpenWeather API key from `VITE_OPENWEATHER_API_KEY` |
+
+**Example**:
+```
+GET https://api.openweathermap.org/geo/1.0/reverse?lat=34.05&lon=-118.24&limit=10&appid={VITE_OPENWEATHER_API_KEY}
+```
+
+### Success Response — `200 OK`
+
+```json
+[
+  {
+    "name": "Los Angeles",
+    "lat": 34.0522,
+    "lon": -118.2437,
+    "country": "US",
+    "state": "California"
+  }
+]
+```
+
+**Selection rule used by the app**: the first entry is treated as the nearest match. If the array is empty or the call fails, UI falls back to `Location (approximate)`.
 
 ### Client timeout guidance
 
-- Client requests SHOULD use an 8-second timeout budget (AbortController) for both geocoding and weather calls.
+- Client requests SHOULD use an 8-second timeout budget (AbortController) for geocoding and weather calls.
 - Timeout failures MUST be mapped to the service-unavailable error state (not location-not-found).
 
 ---
@@ -160,7 +187,8 @@ GET https://api.open-meteo.com/v1/forecast
 > **Note**: `visibility` is always returned in metres regardless of the `wind_speed_unit` parameter. Client-side conversion is required: metres ÷ 1609.344 = miles; metres ÷ 1000 = km.
 
 **Fields used by the app**: `current.*`, `current_units.temperature_2m`, `current_units.wind_speed_10m`, `timezone`  
-**Fields ignored**: `generationtime_ms`, `utc_offset_seconds`, `elevation`, `timezone_abbreviation`, `current.interval`
+**Fields ignored**: `generationtime_ms`, `utc_offset_seconds`, `elevation`, `timezone_abbreviation`, `current.interval`  
+**Implementation note**: timezone abbreviation display is derived client-side from the `timezone` IANA string via `Intl.DateTimeFormat`, so the raw `timezone_abbreviation` field is not required by the UI.
 
 ### Error Response
 

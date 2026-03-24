@@ -5,43 +5,38 @@
 
 ---
 
-## 1. Open-Meteo Geocoding API
+## 1. OpenWeather Geocoding API
 
-**Decision**: Use Open-Meteo's free Geocoding API to resolve location names to coordinates.  
-**Rationale**: Free, no API key, CORS-enabled, returns multiple results for disambiguation, supports city names and partial matches.  
-**Alternatives considered**: Nominatim (OpenStreetMap) — also free/keyless but Open-Meteo geocoding is purpose-built for weather location lookup and returns cleaner disambiguation data.
+**Decision**: Use OpenWeather's Geocoding API for both direct location search and reverse geocoding.  
+**Rationale**: One provider now handles both search and reverse-lookup flows, which keeps request/response mapping consistent between manual search and "Use My Location". The current implementation already standardizes on OpenWeather's direct array response shape.  
+**Alternatives considered**: Open-Meteo geocoding — previously used for direct lookup but replaced so reverse geocoding and search use the same provider contract; Nominatim (OpenStreetMap) — rejected to avoid adding a second alternate geocoding contract.
 
-### Endpoint
+### Direct geocoding endpoint
 
 ```
-GET https://geocoding-api.open-meteo.com/v1/search
-  ?name={city}
-  &count=10
-  &language=en
-  &format=json
+GET https://api.openweathermap.org/geo/1.0/direct
+  ?q={city}
+  &limit=5
+  &appid={VITE_OPENWEATHER_API_KEY}
 ```
 
-### Response shape
+### Direct response shape
 
 ```json
-{
-  "results": [
-    {
-      "id": 4887398,
-      "name": "Chicago",
-      "latitude": 41.85003,
-      "longitude": -87.65005,
-      "country_code": "US",
-      "country": "United States",
-      "admin1": "Illinois"
-    }
-  ]
-}
+[
+  {
+    "name": "Chicago",
+    "lat": 41.85003,
+    "lon": -87.65005,
+    "country": "US",
+    "state": "Illinois"
+  }
+]
 ```
 
-- When `results` has 0 entries → location not found (FR-008 error state)
-- When `results` has 1 entry → proceed directly to weather fetch
-- When `results` has 2–10 entries → present disambiguation list (FR-007)
+- When the returned array has 0 entries → location not found (FR-008 error state)
+- When the returned array has 1 entry → proceed directly to weather fetch
+- When the returned array has 2–5 entries → present disambiguation list (FR-007)
 
 ---
 
@@ -194,17 +189,17 @@ GET https://api.open-meteo.com/v1/forecast
 
 ## 7. Geolocation Integration
 
-**Decision**: Use `navigator.geolocation.getCurrentPosition()` directly in `useGeolocation.js`, then call weather API with coordinates (skip geocoding). Display name behavior is deterministic: use a human-readable timezone-derived label when available, otherwise fall back to `"Your Location"`.  
-**Rationale**: Coordinates are already available, so geocoding adds avoidable latency. Open-Meteo geocoding is forward-only (name to coords), so it is not a reliable reverse-naming dependency for this flow.
+**Decision**: Use `navigator.geolocation.getCurrentPosition()` to obtain coordinates, then call OpenWeather reverse geocoding before fetching weather. If reverse geocoding fails or returns no usable place, fall back to `Location (approximate)`.  
+**Rationale**: The current implementation prioritizes a human-readable nearby place name for both manual geolocation clicks and first-load auto-detection. OpenWeather provides a reverse endpoint that matches the direct geocoding provider already used in search.
 
 **Implementation note**:
-- Primary label source: weather response timezone (for example, `America/Chicago` -> `Chicago`)
-- Fallback label: `Your Location`
-- No secondary reverse-geocoding service is required
+- Primary label source: OpenWeather reverse geocoding (`/geo/1.0/reverse`)
+- Reverse request limit: `10` candidates, with the first OpenWeather result treated as the closest match
+- Fallback label: `Location (approximate)` with weather-card area inference from state/country, timezone area, then coordinate zone
 
 **Rejected alternatives**:
-- Adding reverse-geocoding dependency just for naming (extra complexity)
-- Calling forward geocoding with latitude/longitude parameters (unsupported)
+- Timezone-derived city labels only (too imprecise compared with reverse geocoding)
+- Re-introducing Open-Meteo geocoding for search while using a different provider for reverse lookup (unnecessary provider mismatch)
 
 ---
 

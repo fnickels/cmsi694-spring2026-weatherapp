@@ -12,7 +12,7 @@
 | npm | 10.x (bundled with Node 20) | `npm --version` |
 | Git | Any recent version | `git --version` |
 
-No API keys, accounts, environment variables, or external services are required.
+An OpenWeather Geocoding API key is required for manual search and reverse geocoding flows.
 
 ---
 
@@ -28,6 +28,10 @@ git checkout 001-location-weather-app
 
 # 3. Install dependencies
 npm install
+
+# 4. Configure environment variables
+cp .env.example .env.local
+# then set VITE_OPENWEATHER_API_KEY in .env.local
 ```
 
 ---
@@ -83,7 +87,7 @@ npm run preview
 src/
 ├── components/     UI components (SearchBar, WeatherCard, etc.)
 ├── hooks/          Custom React hooks (useWeather, useGeolocation, useRecentSearches)
-├── services/       Open-Meteo API calls (geocoding.js, weather.js)
+├── services/       OpenWeather geocoding + Open-Meteo weather API calls
 ├── utils/          WMO code mapping, unit conversions
 ├── App.jsx         Root component
 └── main.jsx        Vite entry point
@@ -97,9 +101,15 @@ public/icons/       Weather condition SVG icons (Meteocons)
 
 ---
 
-## No Environment Variables Needed
+## Required Environment Variable
 
-This project uses the Open-Meteo public API (no key required). There is no `.env` file to configure. The app works out of the box after `npm install`.
+This project uses OpenWeather for direct and reverse geocoding. Create `.env.local` with:
+
+```bash
+VITE_OPENWEATHER_API_KEY=your_openweather_api_key_here
+```
+
+Weather data still comes from Open-Meteo and does not require a separate key.
 
 ---
 
@@ -109,6 +119,7 @@ This project uses the Open-Meteo public API (no key required). There is no `.env
 |---------|---------|
 | `npm install` fails | Ensure Node 20+ is installed: `node --version` |
 | Port 5173 already in use | Run `npm run dev -- --port 3000` to use a different port |
-| "Location not found" for a valid city | Check your internet connection; Open-Meteo requires outbound HTTPS |
+| "Location not found" for a valid city | Check your internet connection and verify `VITE_OPENWEATHER_API_KEY` is valid; search and reverse geocoding depend on OpenWeather |
+| `401 Invalid API key` from geocoding | Replace `VITE_OPENWEATHER_API_KEY` in `.env.local` with a valid OpenWeather key and retry after activation |
 | Geolocation not working | The browser requires HTTPS or `localhost` for the Geolocation API — `npm run dev` on localhost is sufficient |
 | Tests fail with "Cannot find module" | Run `npm install` to ensure all dev dependencies are present |

@@ -7,6 +7,7 @@
 
 ```bash
 npm install
+cp .env.example .env.local   # set VITE_OPENWEATHER_API_KEY before running API-dependent flows
 npm run dev   # starts at http://localhost:5173
 ```
 
@@ -20,8 +21,9 @@ npm run dev   # starts at http://localhost:5173
 2. When the browser displays the permission prompt **"Allow this site to use your location?"**, click **Allow**.
 3. **Expected**: A loading spinner labelled "Detecting your location…" appears briefly, then weather data for your detected location loads automatically — no typing required.
 4. **Expected**: The weather card shows an **"Auto-located"** badge near the location name.
-5. **Expected**: The Search Bar is fully usable throughout (not blocked at any point).
-6. **Expected**: The weather card displays coordinates and a local-time line formatted as **"Location's Local Time: <date/time> <TZ_ABBR> (<IANA timezone>)"**.
+5. **Expected**: The location label is resolved through OpenWeather reverse geocoding when the API key is valid.
+6. **Expected**: The Search Bar is fully usable throughout (not blocked at any point).
+7. **Expected**: The weather card displays coordinates and a local-time line formatted as **"Location's Local Time: <date/time> <TZ_ABBR> (<IANA timezone>)"**.
 
 ---
 
@@ -54,7 +56,7 @@ npm run dev   # starts at http://localhost:5173
 
 ### Scenario 6 — Unresolved City Area Fallback
 
-1. Simulate reverse-geocoding failure (or use mocked coordinates with no city name).
+1. Simulate OpenWeather reverse-geocoding failure (or use mocked coordinates with no city name).
 2. Trigger location-based weather load.
 3. **Expected**: The location label uses **"Location (approximate)"**.
 4. **Expected**: The weather card displays **"Coordinates fall within"** with alternate area inference.
@@ -83,6 +85,8 @@ npx vitest run
 # E2E (Playwright)
 npm run e2e
 ```
+
+API-dependent geocoding tests require a valid `VITE_OPENWEATHER_API_KEY` in `.env.local`.
 
 ---
 

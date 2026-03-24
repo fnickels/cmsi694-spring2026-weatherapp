@@ -9,7 +9,7 @@ description: "Task list for Auto-Detect Weather on First Visit feature"
 **Status**: Implemented (manual validation items pending)  
 **Prerequisites**: spec.md ✓, plan.md ✓
 
-**Testing Strategy**: All test tasks below are optional. Include them if practicing TDD (Test-Driven Development); otherwise, implement features first and add tests afterward.
+**Testing Strategy**: Tests explicitly marked as required by the constitution are not optional. Other test tasks marked optional may be deferred when not using TDD, but they remain recommended coverage for this feature.
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -40,7 +40,7 @@ description: "Task list for Auto-Detect Weather on First Visit feature"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [x] T004 [P] Create `src/hooks/useInitialLocation.js` hook skeleton: set up InitialVisitContext state shape, 8-second timeout infrastructure (timer logic, clearTimeout on unmount), and hook export interface — **no live `navigator.geolocation` call yet** (that goes in T009)
+- [x] T004 [P] Create `src/hooks/useInitialLocation.js` hook skeleton: set up InitialVisitContext state shape, 5-second timeout infrastructure (timer logic, clearTimeout on unmount), and hook export interface — **no live `navigator.geolocation` call yet** (that goes in T009)
 - [x] T005 [P] Extend or create `src/utils/locationState.js` utility to define InitialVisitContext structure with status flags: `{ attempted, granted, denied, timedOut, unavailable, coordinates, error }`
 - [x] T006 Update `src/App.jsx` to initialize useInitialLocation on component mount and wire detected coordinates into useWeather hook
 - [x] T007 Create `src/components/InitialLoadingIndicator.jsx` component to display loading state during first-load geolocation + weather fetch (supports FR-009)
@@ -60,11 +60,11 @@ description: "Task list for Auto-Detect Weather on First Visit feature"
 
 ### Implementation for User Story 1
 
-- [x] T009 [US1] Wire live `navigator.geolocation.getCurrentPosition()` call into `src/hooks/useInitialLocation.js`, using the timeout infrastructure from T004; set state based on success/error callback outcomes (FR-001) — *Depends on T004*
+- [x] T009 [US1] Wire live `navigator.geolocation.getCurrentPosition()` call into `src/hooks/useInitialLocation.js`, using the 5-second timeout infrastructure from T004; set state based on success/error callback outcomes (FR-001) — *Depends on T004*
 - [x] T010 [US1] Connect detected coordinates to `useWeather` hook to fetch weather data automatically on successful geolocation; trigger weather fetch synchronously on coordinate resolution (not queued) to support the 6s target in SC-001 (FR-002)
 - [x] T011 [P] [US1] Update `src/components/WeatherCard.jsx` to accept and display `source: 'auto-detected'` flag (FR-003)
 - [x] T012 [P] [US1] Create visual indicator badge/label near location name in WeatherCard showing "Detected" or "Auto-located" (FR-003 placement requirement)
-- [x] T049 [P] [US1] Display resolved city label from geocoding reverse-lookup in `src/components/WeatherCard.jsx`; if no city is returned (coordinates only), render "Location (approximate)" to cover the edge case where geolocation maps to a nearby city rather than the exact user location
+- [x] T049 [P] [US1] Display resolved city label from OpenWeather reverse-lookup in `src/components/WeatherCard.jsx`; if no city is returned (coordinates only), render "Location (approximate)" to cover the edge case where geolocation maps to a nearby city rather than the exact user location
 - [ ] T013 [US1] Test auto-load flow: manual browser geolocation allow → verify weather displays within 6s in Chrome/Firefox/Safari
 
 ### Tests for User Story 1
@@ -90,7 +90,7 @@ description: "Task list for Auto-Detect Weather on First Visit feature"
 - [x] T017 [US2] Create graceful fallback UI in `src/components/GeolocationDeniedNotice.jsx` with user-friendly explanation and optional search encouragement
 - [x] T018 [P] [US2] Update `src/App.jsx` to display GeolocationDeniedNotice when permission denied, without blocking SearchBar or WeatherCard render
 - [x] T019 [P] [US2] Handle geolocation unavailable/unsupported in `src/hooks/useInitialLocation.js`: set `{ unavailable: true }` and skip auto-detection
-- [x] T020 [P] [US2] Implement timeout behavior in `src/hooks/useInitialLocation.js`: after 8s without geolocation response, treat as failure and show fallback
+- [x] T020 [P] [US2] Implement timeout behavior in `src/hooks/useInitialLocation.js`: after 5s without geolocation response, treat as failure and show fallback
 - [x] T021 [US2] Update `src/components/ErrorMessage.jsx` to accept a geolocation error type and show distinct user-facing messages: *"Location access was denied — try entering a city name below"* (permission denied), *"Location request timed out — please enter your location"* (timeout), *"Weather service is temporarily unavailable"* (service error) (FR-008)
 - [x] T022 [US2] Ensure SearchBar remains active/focusable at all times during initial load state (FR-005, accessibility)
 - [ ] T023 [US2] Test fallback flows: deny permission → verify notice shown and search works; simulate unavailable geolocation → verify auto-detect skipped
@@ -100,7 +100,7 @@ description: "Task list for Auto-Detect Weather on First Visit feature"
 - [x] T024 [P] [US2] **Required (Constitution IV — failure-path)**: Write integration test in `tests/integration/fallback-denied.test.jsx`: simulate `navigator.geolocation` permission deny → assert notice rendered and SearchBar functional
 - [x] T025 [P] [US2] Write integration test in `tests/integration/fallback-denied.test.jsx`: mock `navigator.geolocation` as undefined → assert auto-detect skipped *(optional)*
 - [x] T026 [P] [US2] Write e2e test in `tests/e2e/auto-geolocation-flows.spec.js`: deny location → verify notice appears and manual search works *(optional)*
-- [x] T027 [P] [US2] Write e2e test in `tests/e2e/auto-geolocation-flows.spec.js`: mock slow geolocation → verify timeout after 8s and fallback triggered *(optional)*
+- [x] T027 [P] [US2] Write e2e test in `tests/e2e/auto-geolocation-flows.spec.js`: mock slow geolocation → verify timeout after 5s and fallback triggered *(optional)*
 
 **Checkpoint**: User Story 2 complete - fallback paths work for denied/unavailable/timeout cases
 
@@ -123,7 +123,7 @@ description: "Task list for Auto-Detect Weather on First Visit feature"
 - [x] T032 [US3] Test user control: auto-detect loads weather for SF → enter "New York" → weather switches to NY; verify auto-detect does not override (no re-fetch with SF coords)
 - [x] T033 [US3] Test re-prompt: deny location on load → click "Use My Location" → verify re-prompt, allow it → weather loads for new location
 
-### Tests for User Story 3 (Optional - TDD approach)
+### Tests for User Story 3 *(optional — not constitution-mandated)*
 
 - [x] T034 [P] [US3] Write integration test in `tests/integration/user-control.test.jsx`: auto-detect location A → search location B → assert weather shows B and no auto-override
 - [x] T035 [P] [US3] Write integration test in `tests/integration/user-control.test.jsx`: deny location → click "Use My Location" → simulate allow → assert weather loads
@@ -147,7 +147,7 @@ description: "Task list for Auto-Detect Weather on First Visit feature"
 - [x] T044 Update README.md with note: "On localhost, geolocation works reliably. On deployed sites, HTTPS required for geolocation API."
 - [x] T045 Create `specs/002-auto-geolocation-weather/quickstart.md` with manual test steps: (1) open site, allow location → expect auto-weather; (2) deny location → expect fallback; (3) auto-detect, then search new location → expect new weather
 - [ ] T046 [P] Performance audit: verify initial auto-detect + weather fetch completes within 6s on throttled 3G network using Chrome DevTools
-- [x] T047 Add comments to `src/hooks/useInitialLocation.js` documenting the 8-second timeout, InitialVisitContext shape, and session scope assumption
+- [x] T047 Add comments to `src/hooks/useInitialLocation.js` documenting the 5-second timeout, InitialVisitContext shape, and session scope assumption
 - [x] T048 Run accessibility audit with `npm test -- vitest-axe` to confirm auto-loaded weather meets WCAG contrast and labeling standards
 
 **Checkpoint**: Feature complete, tested, documented, and ready for merge
@@ -164,6 +164,8 @@ description: "Task list for Auto-Detect Weather on First Visit feature"
 - [x] T053 [P] Move local-time metadata row to the bottom section of `src/components/WeatherCard.jsx` where observed-time text was previously rendered
 - [x] T054 Update area-details logic in `src/components/WeatherCard.jsx` so "Coordinates fall within" appears only when a meaningful city is unavailable, with fallback resolution from state/country, timezone area, then coordinate zone
 - [x] T055 Update integration assertions in `tests/integration/App.test.jsx` to match refined fallback copy and metadata rendering behavior
+- [x] T056 Add `.env.example` and document `VITE_OPENWEATHER_API_KEY` as a required local setup input for reverse geocoding
+- [x] T057 Update reverse-geocoding implementation/tests to use OpenWeather request/response shapes and fallback behavior
 
 **Checkpoint**: WeatherCard metadata experience aligned with implemented UI behavior and verified by integration tests
 
@@ -224,7 +226,7 @@ Phases 1–6 (complete + polish)
 | 4 | T016–T027 | US2 (P2) | Graceful fallback |
 | 5 | T028–T037 | US3 (P3) | User control & re-prompt |
 | 6 | T038–T048 | — | Polish & documentation |
-| **Total** | **55 tasks** | **3 stories** | **Full feature delivery + post-implementation UI refinement** |
+| **Total** | **57 tasks** | **3 stories** | **Full feature delivery + post-implementation UI refinement** |
 
 ---
 
