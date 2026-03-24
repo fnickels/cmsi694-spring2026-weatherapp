@@ -5,17 +5,30 @@ import App from '../../src/App'
 
 vi.mock('../../src/services/geocoding', () => ({
   searchLocations: vi.fn(),
+  reverseGeocodeLocation: vi.fn(),
 }))
 
 vi.mock('../../src/services/weather', () => ({
   fetchWeather: vi.fn(),
 }))
 
+import { reverseGeocodeLocation } from '../../src/services/geocoding'
 import { fetchWeather } from '../../src/services/weather'
 
 describe('Performance validations', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    reverseGeocodeLocation.mockResolvedValue({
+      id: 10,
+      name: 'Los Angeles',
+      displayName: 'Los Angeles, California, United States',
+      latitude: 34.05,
+      longitude: -118.24,
+      country: 'United States',
+      countryCode: 'US',
+      admin1: 'California',
+      approximate: false,
+    })
     Object.defineProperty(global.navigator, 'geolocation', {
       configurable: true,
       value: {
@@ -26,7 +39,7 @@ describe('Performance validations', () => {
     })
   })
 
-  it('geolocation flow renders weather in less than 8 seconds (mocked)', async () => {
+  it('initial auto-detect flow renders weather in less than 8 seconds (mocked)', async () => {
     fetchWeather.mockResolvedValueOnce({
       observationTime: '2026-03-18T10:00',
       temperatureC: 20,
@@ -44,7 +57,6 @@ describe('Performance validations', () => {
     const start = performance.now()
 
     render(<App />)
-    await userEvent.click(screen.getByRole('button', { name: /use my location/i }))
     await screen.findByText(/partly cloudy/i)
 
     const elapsed = performance.now() - start

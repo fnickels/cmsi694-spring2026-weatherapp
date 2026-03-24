@@ -30,6 +30,7 @@ go.work.sum
 # Node/Vite artifacts
 node_modules/
 dist/
+build/
 .vite/
 .env*
 *.log
@@ -41,5 +42,5 @@ Thumbs.db
 *.swp
 
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/

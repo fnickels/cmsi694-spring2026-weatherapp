@@ -5,13 +5,26 @@ import App from '../../src/App'
 
 vi.mock('../../src/services/geocoding', () => ({
   searchLocations: vi.fn(),
+  reverseGeocodeLocation: vi.fn(),
 }))
 
 vi.mock('../../src/services/weather', () => ({
   fetchWeather: vi.fn(),
 }))
 
-import { searchLocations } from '../../src/services/geocoding'
+// Disable auto-detect in these tests — they cover manual search, disambiguation,
+// unit toggle, and geolocation button flows, not the first-visit auto-detect feature.
+vi.mock('../../src/hooks/useInitialLocation', () => ({
+  useInitialLocation: vi.fn(() => ({
+    context: {
+      attempted: false, granted: false, denied: false, timedOut: false,
+      unavailable: false, userManuallySelected: false, coordinates: null, error: null,
+    },
+    markUserManuallySelected: vi.fn(),
+  })),
+}))
+
+import { reverseGeocodeLocation, searchLocations } from '../../src/services/geocoding'
 import { fetchWeather } from '../../src/services/weather'
 
 const sampleLocation = {
@@ -24,6 +37,7 @@ const sampleLocation = {
 
 const sampleWeather = {
   observationTime: '2026-03-18T10:00',
+  timezone: 'America/Los_Angeles',
   temperatureC: 20,
   feelsLikeC: 19,
   humidity: 60,
@@ -40,6 +54,17 @@ describe('App integration', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     sessionStorage.clear()
+    reverseGeocodeLocation.mockResolvedValue({
+      id: 10,
+      name: 'Los Angeles',
+      displayName: 'Los Angeles, California, United States',
+      latitude: 34.05,
+      longitude: -118.24,
+      country: 'United States',
+      countryCode: 'US',
+      admin1: 'California',
+      approximate: false,
+    })
     Object.defineProperty(global.navigator, 'geolocation', {
       configurable: true,
       value: {
@@ -166,28 +191,33 @@ describe('App integration', () => {
     expect(await screen.findByText(/partly cloudy/i)).toBeInTheDocument()
   })
 
-  it('uses timezone-derived geolocation label and fallback when unavailable', async () => {
-    const originalDateTimeFormat = Intl.DateTimeFormat
+  it('uses reverse-geocoded geolocation label and approximate fallback when lookup fails', async () => {
     fetchWeather.mockResolvedValue(sampleWeather)
-
-    Intl.DateTimeFormat = vi.fn(() => ({
-      resolvedOptions: () => ({ timeZone: 'America/Chicago' }),
-    }))
 
     const { unmount } = render(<App />)
     await userEvent.click(screen.getByRole('button', { name: /use my location/i }))
-    expect(await screen.findByText(/partly cloudy/i)).toBeInTheDocument()
+    expect(reverseGeocodeLocation).toHaveBeenCalledWith(34.05, -118.24)
+    expect(await screen.findByLabelText(/current weather/i)).toHaveTextContent('Los Angeles, California, United States')
+    expect(await screen.findByLabelText(/location coordinates/i)).toHaveTextContent('Latitude: 34.05° N | Longitude: 118.24° W')
+    expect(screen.queryByLabelText(/resolved location area/i)).not.toBeInTheDocument()
+    expect(await screen.findByLabelText(/local time at location/i)).toHaveTextContent(
+      "Location's Local Time: Mar 18, 2026, 10:00 AM PDT (America/Los_Angeles)"
+    )
     unmount()
 
-    Intl.DateTimeFormat = vi.fn(() => ({
-      resolvedOptions: () => ({ timeZone: '' }),
-    }))
+    reverseGeocodeLocation.mockRejectedValueOnce(new Error('Reverse geocoding API error: 503'))
 
     render(<App />)
     await userEvent.click(screen.getByRole('button', { name: /use my location/i }))
     expect(await screen.findByText(/partly cloudy/i)).toBeInTheDocument()
-
-    Intl.DateTimeFormat = originalDateTimeFormat
+    expect(await screen.findByLabelText(/current weather/i)).toHaveTextContent('Location (approximate)')
+    expect(await screen.findByLabelText(/location coordinates/i)).toHaveTextContent('Latitude: 34.05° N | Longitude: 118.24° W')
+    expect(await screen.findByLabelText(/resolved location area/i)).toHaveTextContent(
+      'Coordinates fall within: Timezone area: Los Angeles, America'
+    )
+    expect(await screen.findByLabelText(/local time at location/i)).toHaveTextContent(
+      "Location's Local Time: Mar 18, 2026, 10:00 AM PDT (America/Los_Angeles)"
+    )
   })
 
   it('shows geolocation permission denied error', async () => {
