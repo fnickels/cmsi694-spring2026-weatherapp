@@ -1,26 +1,15 @@
 /**
  * Geocoding Service
- * Uses Open-Meteo Geocoding API to convert location names to coordinates
+ * Uses OpenWeather Geocoding API for location name search and reverse geocoding
  */
 
-const GEOCODING_API_URL = 'https://geocoding-api.open-meteo.com/v1/search'
-const REVERSE_GEOCODING_API_URL = 'https://geocoding-api.open-meteo.com/v1/reverse'
+const GEOCODING_API_URL = 'https://api.openweathermap.org/geo/1.0/direct'
+const REVERSE_GEOCODING_API_URL = 'https://api.openweathermap.org/geo/1.0/reverse'
 const TIMEOUT_MS = 8000
-const CITY_FEATURE_CODES = new Set([
-  'PPL',
-  'PPLA',
-  'PPLA2',
-  'PPLA3',
-  'PPLA4',
-  'PPLC',
-  'PPLG',
-  'PPLL',
-  'PPLQ',
-  'PPLR',
-  'PPLS',
-  'PPLW',
-  'PPLX',
-])
+
+function getOpenWeatherApiKey() {
+  return import.meta.env.VITE_OPENWEATHER_API_KEY || ''
+}
 
 /**
  * Search for locations by name
@@ -33,15 +22,19 @@ export async function searchLocations(query) {
     return []
   }
 
+  const apiKey = getOpenWeatherApiKey()
+  if (!apiKey) {
+    throw new Error('OpenWeather API key not configured. Set VITE_OPENWEATHER_API_KEY environment variable.')
+  }
+
   try {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS)
 
     const params = new URLSearchParams({
-      name: query.trim(),
-      count: 5,
-      language: 'en',
-      format: 'json'
+      q: query.trim(),
+      limit: '5',
+      appid: apiKey
     })
 
     const response = await fetch(
@@ -63,20 +56,20 @@ export async function searchLocations(query) {
 
     const data = await response.json()
 
-    // Handle case where results key is missing
-    if (!data.results || !Array.isArray(data.results)) {
+    // Handle case where results key is missing or not an array
+    if (!Array.isArray(data)) {
       return []
     }
 
     // Transform API results to Location entities
-    return data.results.map(result => ({
-      id: result.id,
+    return data.map(result => ({
+      id: `${result.lat},${result.lon}`,
       name: result.name,
-      latitude: result.latitude,
-      longitude: result.longitude,
+      latitude: result.lat,
+      longitude: result.lon,
       country: result.country || '',
       countryCode: result.country_code || '',
-      admin1: result.admin1 || null,
+      admin1: result.state || null,
       displayName: formatDisplayName(result)
     }))
   } catch (error) {
@@ -103,16 +96,20 @@ export async function reverseGeocodeLocation(latitude, longitude) {
     return null
   }
 
+  const apiKey = getOpenWeatherApiKey()
+  if (!apiKey) {
+    throw new Error('OpenWeather API key not configured. Set VITE_OPENWEATHER_API_KEY environment variable.')
+  }
+
   try {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS)
 
     const params = new URLSearchParams({
-      latitude: latitude.toString(),
-      longitude: longitude.toString(),
-      count: 10,
-      language: 'en',
-      format: 'json'
+      lat: latitude.toString(),
+      lon: longitude.toString(),
+      limit: '10',
+      appid: apiKey
     })
 
     const response = await fetch(
@@ -134,20 +131,22 @@ export async function reverseGeocodeLocation(latitude, longitude) {
 
     const data = await response.json()
 
-    if (!data.results || !Array.isArray(data.results) || data.results.length === 0) {
+    if (!Array.isArray(data) || data.length === 0) {
       return null
     }
 
-    const result = pickClosestCityResult(data.results, latitude, longitude)
+    // OpenWeather returns results ordered by proximity
+    // First result is the closest/most relevant
+    const result = data[0]
 
     return {
-      id: result.id ?? `${latitude},${longitude}`,
+      id: `${result.lat},${result.lon}`,
       name: result.name || 'Your Location',
       latitude,
       longitude,
       country: result.country || '',
       countryCode: result.country_code || '',
-      admin1: result.admin1 || null,
+      admin1: result.state || null,
       displayName: formatDisplayName(result) || 'Location (approximate)',
       approximate: false,
     }
@@ -162,42 +161,6 @@ export async function reverseGeocodeLocation(latitude, longitude) {
   }
 }
 
-function pickClosestCityResult(results, latitude, longitude) {
-  const cityCandidates = results.filter((result) => isCityLikeResult(result))
-  const candidates = cityCandidates.length > 0 ? cityCandidates : results
-
-  return candidates.reduce((closest, candidate) => {
-    if (!closest) {
-      return candidate
-    }
-
-    const closestDistance = coordinateDistanceSquared(closest, latitude, longitude)
-    const candidateDistance = coordinateDistanceSquared(candidate, latitude, longitude)
-
-    return candidateDistance < closestDistance ? candidate : closest
-  }, null)
-}
-
-function isCityLikeResult(result) {
-  const featureCode = typeof result.feature_code === 'string'
-    ? result.feature_code.toUpperCase()
-    : ''
-  return CITY_FEATURE_CODES.has(featureCode)
-}
-
-function coordinateDistanceSquared(result, latitude, longitude) {
-  const resultLat = Number(result.latitude)
-  const resultLon = Number(result.longitude)
-
-  if (Number.isNaN(resultLat) || Number.isNaN(resultLon)) {
-    return Number.POSITIVE_INFINITY
-  }
-
-  const latDiff = resultLat - latitude
-  const lonDiff = resultLon - longitude
-  return (latDiff * latDiff) + (lonDiff * lonDiff)
-}
-
 /**
  * Format a display name from a location result
  * @param {Object} result - API location result
@@ -210,8 +173,8 @@ function formatDisplayName(result) {
     parts.push(result.name)
   }
   
-  if (result.admin1) {
-    parts.push(result.admin1)
+  if (result.state) {
+    parts.push(result.state)
   }
   
   if (result.country) {

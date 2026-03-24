@@ -60,30 +60,24 @@ describe('App geolocation nearest-city integration', () => {
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
-        json: async () => ({
-          results: [
-            {
-              id: 101,
-              name: 'Hollywood Hills',
-              latitude: 34.1205,
-              longitude: -118.3217,
-              feature_code: 'LCTY',
-              country: 'United States',
-              country_code: 'US',
-              admin1: 'California',
-            },
-            {
-              id: 102,
-              name: 'Los Angeles',
-              latitude: 34.0522,
-              longitude: -118.2437,
-              feature_code: 'PPLA',
-              country: 'United States',
-              country_code: 'US',
-              admin1: 'California',
-            },
-          ],
-        }),
+        json: async () => [
+          {
+            name: 'Los Angeles',
+            lat: 34.0522,
+            lon: -118.2437,
+            country: 'United States',
+            country_code: 'US',
+            state: 'California',
+          },
+          {
+            name: 'Hollywood Hills',
+            lat: 34.1205,
+            lon: -118.3217,
+            country: 'United States',
+            country_code: 'US',
+            state: 'California',
+          },
+        ],
       })
     )
   })
@@ -100,7 +94,7 @@ describe('App geolocation nearest-city integration', () => {
 
     expect(global.fetch).toHaveBeenCalledTimes(1)
     const [requestUrl] = global.fetch.mock.calls[0]
-    expect(requestUrl).toContain('/v1/reverse?')
-    expect(requestUrl).toContain('count=10')
+    expect(requestUrl).toContain('/geo/1.0/reverse?')
+    expect(requestUrl).toContain('limit=10')
   })
 })

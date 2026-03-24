@@ -32,7 +32,7 @@ node_modules/
 dist/
 build/
 .vite/
-.env*
+.env.local
 *.log
 
 # Universal
