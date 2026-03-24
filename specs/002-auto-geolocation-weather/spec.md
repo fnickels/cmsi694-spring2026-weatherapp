@@ -2,7 +2,7 @@
 
 **Feature Branch**: `002-auto-geolocation-weather`  
 **Created**: 2026-03-23  
-**Status**: Ready for Implementation  
+**Status**: Implemented  
 **Input**: User description: "add a feature to detect the current visitor's location from browser data, if available, and use that location to populate weather data when the visitor first reaches the site"
 
 ## User Scenarios & Testing *(mandatory)*
@@ -32,6 +32,7 @@ As a first-time visitor, I want weather data for my current location to appear a
 
 1. **Given** a visitor opens the site and location access is available, **When** location is retrieved successfully, **Then** the page loads weather data for the detected location automatically.
 2. **Given** weather data is loaded from detected location, **When** results are shown, **Then** the page clearly indicates that the location was auto-detected.
+3. **Given** weather data is shown for any selected location, **When** the weather card renders, **Then** the card displays latitude/longitude and the location's local time including a short timezone code and IANA timezone.
 
 ---
 
@@ -47,6 +48,7 @@ As a visitor who denies location access or uses a browser without geolocation su
 
 1. **Given** a visitor opens the site and location permission is denied, **When** automatic detection fails, **Then** the site shows a clear message and keeps manual location search available.
 2. **Given** geolocation is not supported, **When** the site loads, **Then** automatic detection is skipped and the visitor sees the normal search-first experience.
+3. **Given** a location cannot be resolved to a meaningful city from coordinates, **When** weather renders, **Then** the card displays alternate area information inferred from state/country, timezone area, or coordinate zone.
 
 ---
 
@@ -72,6 +74,7 @@ As a visitor, I want to change the location after any automatic load so I can vi
 - Visitor blocks location prompts at the browser level: the site should not repeatedly interrupt with additional prompts during that page visit.
 - Detected location is imprecise or mapped to a nearby city: results should still render with a clear location label so users can decide whether to search manually.
 - First load occurs while offline: the site should show network guidance and keep manual input available for later retry.
+- Timezone abbreviation is unavailable for a valid timezone: the card should still display local time with the IANA timezone name.
 
 ## Requirements *(mandatory)*
 
@@ -87,12 +90,16 @@ As a visitor, I want to change the location after any automatic load so I can vi
 - **FR-008**: The system MUST handle auto-detection and weather-fetch failures with user-friendly error messaging that distinguishes location-access issues from weather-service issues.
 - **FR-009**: The system MUST display a visible loading state while automatic location-based weather retrieval is in progress.
 - **FR-010**: If a visitor denies geolocation permission on first load, clicking the "Use My Location" button at any time during that session MUST re-prompt the browser for permission, allowing the user to change their choice.
+- **FR-011**: The weather card MUST display detected coordinates in a readable format (`Latitude` and `Longitude` with hemisphere indicators) whenever numeric coordinates are available.
+- **FR-012**: The weather card MUST display the location's local time label as "Location's Local Time" and include both a short timezone code (for example `PDT`) and IANA timezone identifier when available.
+- **FR-013**: The "Coordinates fall within" line MUST only be shown when a meaningful city is not available; the system MUST derive alternate area context from state/country first, then timezone-derived area, and then coordinate hemisphere zone as a final fallback.
 
 ### Key Entities *(include if feature involves data)*
 
 - **InitialVisitContext**: Represents first-load state for a visitor, including whether location detection was attempted, succeeded, denied, timed out, or unavailable.
 - **DetectedLocation**: Represents browser-provided geographic location used to request weather data, including coordinate pair and user-visible resolved place label.
 - **InitialWeatherResult**: Represents the weather data shown immediately on first page load, marked with a `source` flag indicating either `'auto-detected'` (from geolocation) or `'manual'` (user-initiated search). On page refresh, auto-detection restarts and a new initial context is established.
+- **WeatherPresentationContext**: Represents weather-card metadata for display, including formatted coordinates, local-time label with timezone code, and inferred area details for unresolved city cases.
 
 ## Success Criteria *(mandatory)*
 

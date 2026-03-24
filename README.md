@@ -23,6 +23,14 @@ App runs at http://localhost:5173.
 - On first visit, the site automatically requests your location and loads local weather. Allow the browser prompt to see instant results.
 - If location access is denied or unavailable, a notice is shown and you can still search by city name manually.
 
+## Implemented Changes
+
+- Weather card now displays latitude/longitude using hemisphere notation (for example, `34.05° N | 118.24° W`).
+- Local time is shown as `Location's Local Time` and includes both timezone abbreviation and IANA timezone (for example, `PDT (America/Los_Angeles)`).
+- Auto-detected weather remains clearly marked with an `Auto-located` badge.
+- For unresolved locations, the label shows `Location (approximate)`.
+- `Coordinates fall within` is now conditional: it only appears when a meaningful city is not available, using fallback area inference from state/country, then timezone area, then coordinate zone.
+
 ## Testing
 
 ```bash

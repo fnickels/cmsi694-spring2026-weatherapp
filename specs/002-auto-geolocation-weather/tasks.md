@@ -6,7 +6,7 @@ description: "Task list for Auto-Detect Weather on First Visit feature"
 
 **Input**: Design documents from `/specs/002-auto-geolocation-weather/`  
 **Branch**: `002-auto-geolocation-weather`  
-**Status**: Ready for implementation  
+**Status**: Implemented (manual validation items pending)  
 **Prerequisites**: spec.md ✓, plan.md ✓
 
 **Testing Strategy**: All test tasks below are optional. Include them if practicing TDD (Test-Driven Development); otherwise, implement features first and add tests afterward.
@@ -154,6 +154,21 @@ description: "Task list for Auto-Detect Weather on First Visit feature"
 
 ---
 
+## Phase 7: Post-Implementation WeatherCard Enhancements
+
+**Purpose**: Reflect UI refinements and metadata display updates applied after initial feature completion
+
+- [x] T050 [P] Add latitude/longitude display to `src/components/WeatherCard.jsx` using readable hemisphere formatting (`N/S`, `E/W`)
+- [x] T051 [P] Add local time metadata row in `src/components/WeatherCard.jsx` labeled as "Location's Local Time"
+- [x] T052 [P] Include timezone context in local time output by displaying both timezone abbreviation (for example `PDT`) and IANA timezone (for example `America/Los_Angeles`)
+- [x] T053 [P] Move local-time metadata row to the bottom section of `src/components/WeatherCard.jsx` where observed-time text was previously rendered
+- [x] T054 Update area-details logic in `src/components/WeatherCard.jsx` so "Coordinates fall within" appears only when a meaningful city is unavailable, with fallback resolution from state/country, timezone area, then coordinate zone
+- [x] T055 Update integration assertions in `tests/integration/App.test.jsx` to match refined fallback copy and metadata rendering behavior
+
+**Checkpoint**: WeatherCard metadata experience aligned with implemented UI behavior and verified by integration tests
+
+---
+
 ## Dependencies & Execution Strategy
 
 ### Strict Ordering (Cannot Parallelize)
@@ -209,7 +224,7 @@ Phases 1–6 (complete + polish)
 | 4 | T016–T027 | US2 (P2) | Graceful fallback |
 | 5 | T028–T037 | US3 (P3) | User control & re-prompt |
 | 6 | T038–T048 | — | Polish & documentation |
-| **Total** | **49 tasks** | **3 stories** | **Full feature delivery** |
+| **Total** | **55 tasks** | **3 stories** | **Full feature delivery + post-implementation UI refinement** |
 
 ---
 

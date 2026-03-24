@@ -21,6 +21,7 @@ npm run dev   # starts at http://localhost:5173
 3. **Expected**: A loading spinner labelled "Detecting your location…" appears briefly, then weather data for your detected location loads automatically — no typing required.
 4. **Expected**: The weather card shows an **"Auto-located"** badge near the location name.
 5. **Expected**: The Search Bar is fully usable throughout (not blocked at any point).
+6. **Expected**: The weather card displays coordinates and a local-time line formatted as **"Location's Local Time: <date/time> <TZ_ABBR> (<IANA timezone>)"**.
 
 ---
 
@@ -48,6 +49,16 @@ npm run dev   # starts at http://localhost:5173
 3. **Expected**: Weather switches to Tokyo immediately.
 4. **Expected**: The "Auto-located" badge is no longer shown (manual search result has no badge).
 5. **Expected**: The page does not revert to the auto-detected location.
+
+---
+
+### Scenario 6 — Unresolved City Area Fallback
+
+1. Simulate reverse-geocoding failure (or use mocked coordinates with no city name).
+2. Trigger location-based weather load.
+3. **Expected**: The location label uses **"Location (approximate)"**.
+4. **Expected**: The weather card displays **"Coordinates fall within"** with alternate area inference.
+5. **Expected**: If state/country are unavailable, area inference falls back to timezone area and then coordinate zone.
 
 ---
 
