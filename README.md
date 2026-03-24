@@ -21,7 +21,9 @@ App runs at http://localhost:5173.
 - Geolocation works on `localhost` during local development.
 - In deployed environments, geolocation **requires HTTPS** — the browser will not expose location data over plain HTTP.
 - On first visit, the site automatically requests your location and loads local weather. Allow the browser prompt to see instant results.
-- If location access is denied or unavailable, a notice is shown and you can still search by city name manually.
+- If location access is denied, unavailable, or times out after 5 seconds, a notice is shown and you can still search by city name manually.
+- When a geolocation request fails, no browser-locale or fixed default weather is auto-loaded; manual search remains the fallback path.
+- Clicking Use My Location after denial or timeout retries geolocation.
 
 ## Implemented Changes
 

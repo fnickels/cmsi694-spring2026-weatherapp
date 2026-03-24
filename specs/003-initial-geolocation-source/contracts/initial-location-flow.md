@@ -32,6 +32,18 @@ Define user-visible behavior contract for initial weather location source select
 7. If manual location was selected, late geolocation cannot override active context.
 8. Each user click on Use My Location after denial starts a new geolocation attempt.
 
+## State-Machine Test Matrix
+
+| Case | Initial State | Trigger | Expected Transition | Expected Outcome |
+|---|---|---|---|---|
+| S1 | idle | first load + geolocation success < 5s | attempted -> granted | auto weather loads from coordinates |
+| S2 | idle | first load + permission denied | attempted -> denied | fallback notice + manual search available |
+| S3 | idle | first load + no callback until 5s | attempted -> timeout | fallback notice + manual search available |
+| S4 | idle | first load + unavailable error | attempted -> unavailable | fallback notice + manual search available |
+| S5 | timeout fallback | late success, no manual selection | timeout -> granted | late result auto-applies |
+| S6 | timeout fallback | manual search then late success | timeout -> manual (authoritative) | late result ignored |
+| S7 | denied | user clicks Use My Location | denied -> attempted | retry geolocation request starts |
+
 ## Acceptance Mapping
 
 - FR-001, FR-002, FR-003, FR-005, FR-006, FR-008, FR-010, FR-011, FR-012

@@ -142,4 +142,46 @@ describe('User control after auto-detect', () => {
     expect(geolocationMock).toHaveBeenCalledTimes(2)
     expect(await screen.findByLabelText(/current weather/i)).toHaveTextContent('Chicago, Illinois, United States')
   })
+
+  it('retries geolocation after an initial timeout when user clicks Use My Location', async () => {
+    fetchWeather.mockResolvedValueOnce(autoDetectedWeather)
+
+    const geolocationMock = vi
+      .fn()
+      .mockImplementationOnce((_success, error) => {
+        error({ code: 3, TIMEOUT: 3, message: 'Timeout' })
+      })
+      .mockImplementationOnce((success) => {
+        success({ coords: { latitude: 41.88, longitude: -87.63 } })
+      })
+
+    Object.defineProperty(global.navigator, 'geolocation', {
+      configurable: true,
+      value: {
+        getCurrentPosition: geolocationMock,
+      },
+    })
+
+    reverseGeocodeLocation.mockResolvedValueOnce({
+      id: 3,
+      name: 'Chicago',
+      displayName: 'Chicago, Illinois, United States',
+      latitude: 41.88,
+      longitude: -87.63,
+      country: 'United States',
+      countryCode: 'US',
+      admin1: 'Illinois',
+      approximate: false,
+    })
+
+    render(<App />)
+
+    expect(await screen.findByText(/location request timed out/i)).toBeInTheDocument()
+
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: /use my location/i }))
+
+    expect(geolocationMock).toHaveBeenCalledTimes(2)
+    expect(await screen.findByLabelText(/current weather/i)).toHaveTextContent('Chicago, Illinois, United States')
+  })
 })

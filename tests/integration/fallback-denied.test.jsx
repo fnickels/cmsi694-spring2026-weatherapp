@@ -106,3 +106,35 @@ describe('Fallback when geolocation unavailable (US2, FR-001)', () => {
     expect(screen.getByLabelText(/location search/i)).toBeInTheDocument()
   })
 })
+
+describe('Fallback when geolocation times out (US2, FR-005)', () => {
+  let getCurrentPositionMock
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    sessionStorage.clear()
+
+    getCurrentPositionMock = vi.fn((_success, error) => {
+      error({ code: 3, TIMEOUT: 3, message: 'Timeout' })
+    })
+
+    Object.defineProperty(global.navigator, 'geolocation', {
+      configurable: true,
+      value: {
+        getCurrentPosition: getCurrentPositionMock,
+      },
+    })
+  })
+
+  it('shows timeout fallback and requests geolocation with 5-second timeout', async () => {
+    render(<App />)
+
+    expect(await screen.findByText(/location request timed out/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/location search/i)).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: /^search$/i })).not.toBeDisabled()
+
+    expect(getCurrentPositionMock).toHaveBeenCalled()
+    const options = getCurrentPositionMock.mock.calls[0][2]
+    expect(options.timeout).toBe(5000)
+  })
+})

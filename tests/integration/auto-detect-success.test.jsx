@@ -33,6 +33,11 @@ const sampleWeather = {
   conditionIcon: 'clear-day',
 }
 
+function assertInitialLocationContract({ weatherRegionVisible, autoLocatedBadgeVisible }) {
+  expect(weatherRegionVisible).toBe(true)
+  expect(autoLocatedBadgeVisible).toBe(true)
+}
+
 describe('Auto-detect happy path (US1, FR-001/002/003)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -71,6 +76,11 @@ describe('Auto-detect happy path (US1, FR-001/002/003)', () => {
     render(<App />)
     expect(await screen.findByLabelText(/location was auto-detected/i)).toBeInTheDocument()
     expect(await screen.findByText(/auto-located/i)).toBeInTheDocument()
+
+    assertInitialLocationContract({
+      weatherRegionVisible: true,
+      autoLocatedBadgeVisible: true,
+    })
   })
 
   it('does not block the search bar during or after auto-detection (FR-005)', async () => {
@@ -81,4 +91,27 @@ describe('Auto-detect happy path (US1, FR-001/002/003)', () => {
     expect(screen.getByLabelText(/location search/i)).not.toBeDisabled()
     expect(screen.getByRole('button', { name: /^search$/i })).not.toBeDisabled()
   })
+
+  it('applies a late geolocation result after fallback if user has not manually searched (FR-011)', async () => {
+    const geolocationMock = vi.fn((success) => {
+      setTimeout(() => {
+        success({ coords: { latitude: 37.77, longitude: -122.41 } })
+      }, 5200)
+    })
+
+    Object.defineProperty(global.navigator, 'geolocation', {
+      configurable: true,
+      value: {
+        getCurrentPosition: geolocationMock,
+      },
+    })
+
+    render(<App />)
+
+    expect(geolocationMock).toHaveBeenCalled()
+    const options = geolocationMock.mock.calls[0][2]
+    expect(options.timeout).toBe(5000)
+    expect(await screen.findByRole('region', { name: /current weather/i }, { timeout: 10000 })).toBeInTheDocument()
+    expect(await screen.findByText(/auto-located/i, {}, { timeout: 10000 })).toBeInTheDocument()
+  }, 15000)
 })
