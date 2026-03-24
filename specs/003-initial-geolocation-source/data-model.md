@@ -15,7 +15,7 @@ Fields:
 - `status`: `idle | requesting_permission | locating | success | denied | unavailable | timeout | failed | fallback`
 - `startedAt`: number (epoch ms)
 - `resolvedAt`: number | null
-- `timeoutMs`: number (fixed at 5000)
+- `timeoutMs`: number (fixed at 5000; implementation constant: `INITIAL_GEOLOCATION_TIMEOUT_MS = 5000` in `src/utils/locationState.js`)
 - `errorType`: `permission | unavailable | timeout | unknown | none`
 - `errorMessage`: string | null
 
@@ -32,7 +32,23 @@ State transitions:
 - `idle -> locating -> failed -> fallback`
 - `fallback -> success` allowed only when late result arrives and manual selection has not occurred.
 
-## Entity: CoordinateLocation
+## Runtime Wrapper: InitialVisitContext
+
+React hook interface wrapping `InitialLocationAttempt` state for consumption by `App.jsx` and dependent components.
+
+Exposed by `useInitialLocation.js` as: `{ context, markUserManuallySelected }`
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `context` | `InitialLocationAttempt` shape | Current first-load state including `attempted`, `granted`, `denied`, `timedOut`, `unavailable`, `userManuallySelected`, `coordinates`, `error` |
+| `markUserManuallySelected()` | function | Sets `userManuallySelected = true` to guard against late-geolocation overrides (FR-008) |
+
+Notes:
+- `InitialVisitContext` is the hook return value; `InitialLocationAttempt` is the underlying domain entity.
+- `context.coordinates` is populated on success and used by `useWeather` to trigger weather fetch without manual input (FR-003).
+- Implementation constant: `INITIAL_GEOLOCATION_TIMEOUT_MS = 5000` (matches `timeoutMs` field).
+
+
 
 Represents a location resolved from geolocation coordinates.
 

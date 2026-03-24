@@ -115,3 +115,35 @@ describe('Auto-detect happy path (US1, FR-001/002/003)', () => {
     expect(await screen.findByText(/auto-located/i, {}, { timeout: 10000 })).toBeInTheDocument()
   }, 15000)
 })
+
+/**
+ * T037 — Rural / low-confidence coordinate label fallback
+ * Spec edge case: "Coordinates map to a low-confidence or rural area label"
+ * When reverse geocoding returns null, CoordinateLocation.label MUST default to
+ * "Location (approximate)" so weather can still render with a readable label.
+ */
+describe('Approximate-label fallback when reverse geocoding returns null (data-model CoordinateLocation)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    sessionStorage.clear()
+
+    // Reverse geocoding returns null (rural / low-confidence coords)
+    reverseGeocodeLocation.mockResolvedValue(null)
+    fetchWeather.mockResolvedValue(sampleWeather)
+
+    Object.defineProperty(global.navigator, 'geolocation', {
+      configurable: true,
+      value: {
+        getCurrentPosition: vi.fn((success) => {
+          success({ coords: { latitude: 36.5, longitude: -116.9 } })
+        }),
+      },
+    })
+  })
+
+  it('renders weather with "Location (approximate)" when geocoding returns null (CoordinateLocation.label fallback)', async () => {
+    render(<App />)
+    expect(await screen.findByRole('region', { name: /current weather/i })).toBeInTheDocument()
+    expect((await screen.findAllByText(/location \(approximate\)/i)).length).toBeGreaterThan(0)
+  })
+})

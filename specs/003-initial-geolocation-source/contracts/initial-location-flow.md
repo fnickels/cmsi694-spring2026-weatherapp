@@ -34,16 +34,23 @@ Define user-visible behavior contract for initial weather location source select
 
 ## State-Machine Test Matrix
 
+State names match canonical constants in `src/utils/locationState.js` and `data-model.md` (`InitialLocationAttempt.status`).
+
 | Case | Initial State | Trigger | Expected Transition | Expected Outcome |
 |---|---|---|---|---|
-| S1 | idle | first load + geolocation success < 5s | attempted -> granted | auto weather loads from coordinates |
-| S2 | idle | first load + permission denied | attempted -> denied | fallback notice + manual search available |
-| S3 | idle | first load + no callback until 5s | attempted -> timeout | fallback notice + manual search available |
-| S4 | idle | first load + unavailable error | attempted -> unavailable | fallback notice + manual search available |
-| S5 | timeout fallback | late success, no manual selection | timeout -> granted | late result auto-applies |
-| S6 | timeout fallback | manual search then late success | timeout -> manual (authoritative) | late result ignored |
-| S7 | denied | user clicks Use My Location | denied -> attempted | retry geolocation request starts |
+| S1 | idle | first load + geolocation success < 5s | requesting_permission → locating → success | auto weather loads from coordinates |
+| S2 | idle | first load + permission denied | requesting_permission → denied → fallback | fallback notice + manual search available |
+| S3 | idle | first load + no callback until 5s | requesting_permission → locating → timeout → fallback | fallback notice + manual search available |
+| S4 | idle | first load + unavailable error | requesting_permission → locating → unavailable → fallback | fallback notice + manual search available |
+| S5 | fallback (timeout) | late success, no manual selection | fallback → success | late result auto-applies |
+| S6 | fallback (timeout) | manual search then late success | fallback → manual (authoritative) | late result ignored |
+| S7 | denied | user clicks Use My Location | denied → requesting_permission | retry geolocation request starts |
 
 ## Acceptance Mapping
 
-- FR-001, FR-002, FR-003, FR-005, FR-006, FR-008, FR-010, FR-011, FR-012
+- FR-001, FR-002, FR-003, FR-004, FR-005, FR-006, FR-007, FR-008, FR-010, FR-011, FR-012
+
+| FR | Contract Rule(s) |
+|----|------------------|
+| FR-004 (no browser-locale as primary) | Rule 5 |
+| FR-007 (manual search always available) | Rule 4; guaranteed across all fallback states |

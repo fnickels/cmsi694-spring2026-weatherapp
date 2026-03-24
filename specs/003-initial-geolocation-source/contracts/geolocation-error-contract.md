@@ -17,7 +17,7 @@ Standardize recoverable geolocation error behavior and messaging classes for fir
 |---|---|
 | permission_denied | Show clear guidance, keep manual search enabled, allow retry via Use My Location click |
 | position_unavailable | Show recoverable fallback guidance, keep manual search enabled |
-| timeout | Transition at 5 seconds to fallback UI, keep manual search enabled |
+| timeout | Transition at 5 seconds to fallback UI, keep manual search enabled; if geolocation result later arrives and no manual location was selected, auto-apply late result (FR-011) |
 | unknown | Show generic recoverable message, keep manual search enabled |
 
 ## Non-Negotiable Guarantees
@@ -29,4 +29,4 @@ Standardize recoverable geolocation error behavior and messaging classes for fir
 
 ## Acceptance Mapping
 
-- FR-005, FR-007, FR-009, FR-010, FR-012
+- FR-005, FR-007, FR-009, FR-010, FR-011, FR-012

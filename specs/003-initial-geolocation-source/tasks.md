@@ -2,7 +2,7 @@
 
 **Input**: Design documents from `/specs/003-initial-geolocation-source/`  
 **Branch**: `003-initial-geolocation-source`  
-**Status**: Implemented (T010, T035 pending)  
+**Status**: Implemented  
 **Prerequisites**: spec.md ✓, plan.md ✓, research.md ✓, data-model.md ✓, contracts/ ✓
 
 **Testing Strategy**: Tests are required for this feature; happy-path and failure-path coverage of geolocation-first initialization are explicitly mandated by constitution Principle IV.
@@ -21,7 +21,7 @@
 
 - [x] T001 Define initial geolocation state-machine test matrix in specs/003-initial-geolocation-source/contracts/initial-location-flow.md
 - [x] T002 [P] Add geolocation-first test fixtures and navigator mock helpers in tests/setup.js
-- [x] T003 [P] Add contract assertion utilities for initial-location flow in tests/integration/auto-detect-success.test.jsx
+- [x] T003 [P] Add contract assertion utilities for initial-location flow in tests/integration/auto-detect-success.test.jsx *(helper utilities and mock factories only — no `test()` / `it()` blocks; actual test cases go in T009)*
 
 **→ Setup Ready**: Test infrastructure and contract documentation in place.
 
@@ -53,15 +53,15 @@
 
 ### Tests for User Story 1
 
-- [x] T009 [P] [US1] **Required (Constitution IV — happy path)**: Add integration test for first-load permission-granted auto-detect flow in tests/integration/auto-detect-success.test.jsx
-- [ ] T010 [P] [US1] Add e2e scenario for first-load geolocation success with location granted in tests/e2e/auto-geolocation-flows.spec.js
+- [x] T009 [P] [US1] **Required (Constitution IV — happy path)**: Add integration test cases for first-load permission-granted auto-detect flow in tests/integration/auto-detect-success.test.jsx *(test cases only — helper utilities already in place from T003)*
+- [x] T010 [P] [US1] Add e2e scenario for first-load geolocation success with location granted in tests/e2e/auto-geolocation-flows.spec.js
 
 ### Implementation for User Story 1
 
-- [x] T011 [US1] Request `navigator.geolocation.getCurrentPosition()` immediately on first page load in src/hooks/useInitialLocation.js
+- [x] T011 [US1] Request `navigator.geolocation.getCurrentPosition()` immediately on first page load in src/hooks/useInitialLocation.js *(enforces FR-002 prompt timing and FR-004 geolocation-first sourcing)*
 - [x] T012 [US1] Enforce 5-second initial geolocation timeout using `INITIAL_GEOLOCATION_TIMEOUT_MS = 5000` in src/hooks/useInitialLocation.js
-- [x] T013 [US1] Trigger coordinate-based weather fetch via `useWeather` on successful `granted` state transition in src/hooks/useWeather.js
-- [x] T014 [US1] Render visible in-progress spinner during initial geolocation pending state in src/components/InitialLoadingIndicator.jsx
+- [x] T013 [US1] Trigger coordinate-based weather fetch via `useWeather` on successful `granted` state transition in src/hooks/useWeather.js *(enforces FR-003 and FR-004 — coordinates drive the fetch, not browser-locale)*
+- [x] T014 [US1] Render visible in-progress spinner during initial geolocation pending state in src/components/InitialLoadingIndicator.jsx — component MUST use `role="status"` or equivalent ARIA live region so screen readers announce the loading state (FR-006 + Constitution III)
 - [x] T015 [US1] Integrate initial geolocation loading and success rendering conditions in src/App.jsx
 
 **→ Checkpoint**: US1 independently functional and testable.
@@ -72,7 +72,7 @@
 
 **Goal**: Denial, timeout, unavailable, and unknown failure paths leave manual search fully usable with no substitute auto-load — matching all 4 error classes in `contracts/geolocation-error-contract.md`.
 
-**Covers**: FR-004, FR-005, FR-007, FR-009, FR-010, FR-012
+**Covers**: FR-004 (failure-path aspect — on failure no locale substitution occurs), FR-005, FR-007, FR-009, FR-010, FR-012
 
 **Independent Test Criterion**: Deny permission or simulate geolocation failure → verify recoverable fallback message appears and manual location search completes without page reload.
 
@@ -88,7 +88,8 @@
 - [x] T020 [US2] Enforce `LocationSourcePolicy.failureFallback = manual_only` — block any non-user weather auto-load on geolocation failure in src/App.jsx
 - [x] T021 [US2] Differentiate geolocation-access errors (`permission_denied`, `timeout`, `unavailable`) from weather-service errors in src/components/ErrorMessage.jsx
 - [x] T022 [US2] Ensure manual location search `SearchBar` remains enabled and focusable across all fallback states in src/components/SearchBar.jsx
-- [x] T023 [US2] Implement retry-on-click geolocation attempt after denial — each click on Use My Location calls `getCurrentPosition()` again in src/hooks/useGeolocation.js
+- [x] T023 [US2] Implement retry-on-click geolocation attempt after denial — each click on Use My Location calls `getCurrentPosition()` again in src/hooks/useGeolocation.js *(also covers same-session deny→grant path: if user grants permission on re-prompt, the success result flows through normal granted-state handling)*
+- [x] T038 [P] [US2] Add integration test for same-session deny→grant scenario: simulate denial on initial load → click Use My Location → simulate permission granted → assert weather loads from new coordinates in tests/integration/fallback-denied.test.jsx *(spec edge case 1: "Visitor grants location permission after initially denying during the same session")*
 
 **→ Checkpoint**: US1 and US2 both independently functional.
 
@@ -126,9 +127,10 @@
 - [x] T031 [P] Align quick verification instructions with implemented first-load behavior in specs/003-initial-geolocation-source/quickstart.md
 - [x] T032 Execute full integration regression suite for geolocation and manual flows: `npx vitest run tests/integration/auto-detect-success.test.jsx tests/integration/fallback-denied.test.jsx tests/integration/user-control.test.jsx tests/integration/App.test.jsx`
 - [x] T033 Execute e2e geolocation regression suite for desktop and mobile emulation: `npx playwright test tests/e2e/core-flows.spec.js tests/e2e/comprehensive-flows.spec.js tests/e2e/geolocation-mobile.spec.js`
-- [x] T034 Define measurable SC-001/SC-003/SC-004 validation protocol (sample size, environment, thresholds) in specs/003-initial-geolocation-source/quickstart.md
-- [ ] T035 Execute and record SC-001 timing-validation sample runs (≥90% first-load within 6s) in specs/003-initial-geolocation-source/quickstart.md
-- [x] T036 Execute and record SC-003 and SC-004 outcome-rate validation runs in specs/003-initial-geolocation-source/quickstart.md
+- [x] T034 Define measurable SC-001/SC-002/SC-003/SC-004 validation protocol (sample size, environment, thresholds) in specs/003-initial-geolocation-source/quickstart.md
+- [x] T035 Execute and record SC-001 timing-validation sample runs (≥90% first-load within 6s) in specs/003-initial-geolocation-source/quickstart.md
+- [x] T036 Execute and record SC-002, SC-003, and SC-004 outcome-rate validation runs in specs/003-initial-geolocation-source/quickstart.md
+- [x] T037 [P] Add unit or integration test verifying `CoordinateLocation.label` defaults to `'Your Location'` (or equivalent) when reverse geocoding returns empty/null label — covers spec edge case "coordinates map to low-confidence or rural area" in tests/unit/geocodingService.test.js or tests/integration/auto-detect-success.test.jsx
 
 ---
 

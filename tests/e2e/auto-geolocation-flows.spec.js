@@ -59,42 +59,50 @@ function mockWeatherApis(page) {
     },
   ]
 
-  page.route('https://geocoding-api.open-meteo.com/v1/search**', async (route) => {
+  // OpenWeather direct geocoding — search by name
+  page.route('https://api.openweathermap.org/geo/1.0/direct**', async (route) => {
     const url = new URL(route.request().url())
-    const query = (url.searchParams.get('name') || '').toLowerCase().trim()
+    const query = (url.searchParams.get('q') || '').toLowerCase().trim()
     const location = locationsByName[query]
 
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({
-        results: location
+      body: JSON.stringify(
+        location
           ? [{
-              id: location.id,
               name: location.name,
-              latitude: location.latitude,
-              longitude: location.longitude,
-              country: location.country,
-              country_code: location.country_code,
-              admin1: location.admin1,
+              lat: location.latitude,
+              lon: location.longitude,
+              country: location.country_code,
+              state: location.admin1,
             }]
-          : [],
-      }),
+          : []
+      ),
     })
   })
 
-  page.route('https://geocoding-api.open-meteo.com/v1/reverse**', async (route) => {
+  // OpenWeather reverse geocoding — resolve coordinates to place name
+  page.route('https://api.openweathermap.org/geo/1.0/reverse**', async (route) => {
     const url = new URL(route.request().url())
-    const latitude = Number(url.searchParams.get('latitude'))
-    const longitude = Number(url.searchParams.get('longitude'))
-    const matched = reverseByCoordinate.find((entry) => entry.match({ latitude, longitude }))
+    const lat = Number(url.searchParams.get('lat'))
+    const lon = Number(url.searchParams.get('lon'))
+    const matched = reverseByCoordinate.find((entry) => entry.match({ latitude: lat, longitude: lon }))
 
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({
-        results: matched ? [matched.result] : [],
-      }),
+      body: JSON.stringify(
+        matched
+          ? [{
+              name: matched.result.name,
+              lat: matched.result.latitude,
+              lon: matched.result.longitude,
+              country: matched.result.country_code,
+              state: matched.result.admin1,
+            }]
+          : []
+      ),
     })
   })
 
@@ -155,7 +163,9 @@ async function installGeolocationBehavior(page, behavior) {
             }
 
             if (selectedBehavior === 'deny-then-success') {
-              if (calls === 1) {
+              // React StrictMode can invoke mount effects twice in development,
+              // so deny initial auto-detect attempts and succeed on explicit retry.
+              if (calls <= 2) {
                 error({ code: 1, PERMISSION_DENIED: 1, message: 'Denied' })
                 return
               }
@@ -179,7 +189,7 @@ test.describe('Auto geolocation flows', () => {
     const weatherCard = page.getByLabel('Current weather')
     await expect(weatherCard).toContainText('Chicago', { timeout: 30000 })
     await expect(weatherCard).toContainText('Auto-located', { timeout: 30000 })
-    expect(Date.now() - start).toBeLessThan(30000)
+    expect(Date.now() - start).toBeLessThan(6000)
   })
 
   test('shows fallback notice and keeps search usable when permission is denied', async ({ page }) => {
