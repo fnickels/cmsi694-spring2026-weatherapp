@@ -199,9 +199,7 @@ describe('App integration', () => {
     expect(reverseGeocodeLocation).toHaveBeenCalledWith(34.05, -118.24)
     expect(await screen.findByLabelText(/current weather/i)).toHaveTextContent('Los Angeles, California, United States')
     expect(await screen.findByLabelText(/location coordinates/i)).toHaveTextContent('Latitude: 34.05° N | Longitude: 118.24° W')
-    expect(await screen.findByLabelText(/resolved location area/i)).toHaveTextContent(
-      'Coordinates fall within: City: Los Angeles | State/Region: California | Country: United States'
-    )
+    expect(screen.queryByLabelText(/resolved location area/i)).not.toBeInTheDocument()
     expect(await screen.findByLabelText(/local time at location/i)).toHaveTextContent(
       "Location's Local Time: Mar 18, 2026, 10:00 AM PDT (America/Los_Angeles)"
     )
@@ -214,7 +212,9 @@ describe('App integration', () => {
     expect(await screen.findByText(/partly cloudy/i)).toBeInTheDocument()
     expect(await screen.findByLabelText(/current weather/i)).toHaveTextContent('Location (approximate)')
     expect(await screen.findByLabelText(/location coordinates/i)).toHaveTextContent('Latitude: 34.05° N | Longitude: 118.24° W')
-    expect(screen.queryByLabelText(/resolved location area/i)).not.toBeInTheDocument()
+    expect(await screen.findByLabelText(/resolved location area/i)).toHaveTextContent(
+      'Coordinates fall within: Timezone area: Los Angeles, America'
+    )
     expect(await screen.findByLabelText(/local time at location/i)).toHaveTextContent(
       "Location's Local Time: Mar 18, 2026, 10:00 AM PDT (America/Los_Angeles)"
     )

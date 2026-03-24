@@ -16,13 +16,38 @@ function formatCoordinate(value, positiveLabel, negativeLabel) {
   return `${absoluteValue}° ${direction}`
 }
 
-function buildAreaDetails(location) {
-  const parts = []
-  const hasMeaningfulCity = location?.name && location.name !== 'Your Location'
-
-  if (hasMeaningfulCity) {
-    parts.push(`City: ${location.name}`)
+function parseTimezoneArea(timezone) {
+  if (!timezone || typeof timezone !== 'string' || !timezone.includes('/')) {
+    return null
   }
+
+  const [region, city] = timezone.split('/')
+  if (!region || !city) {
+    return null
+  }
+
+  const formattedRegion = region.replace(/_/g, ' ')
+  const formattedCity = city.replace(/_/g, ' ')
+  return `${formattedCity}, ${formattedRegion}`
+}
+
+function describeCoordinateZone(latitude, longitude) {
+  if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+    return null
+  }
+
+  const latHemisphere = latitude >= 0 ? 'Northern Hemisphere' : 'Southern Hemisphere'
+  const lonHemisphere = longitude >= 0 ? 'Eastern Hemisphere' : 'Western Hemisphere'
+  return `${latHemisphere}, ${lonHemisphere}`
+}
+
+function buildAreaDetails(location, timezone) {
+  const hasMeaningfulCity = location?.name && location.name !== 'Your Location'
+  if (hasMeaningfulCity) {
+    return null
+  }
+
+  const parts = []
 
   if (location?.admin1) {
     parts.push(`State/Region: ${location.admin1}`)
@@ -30,6 +55,20 @@ function buildAreaDetails(location) {
 
   if (location?.country) {
     parts.push(`Country: ${location.country}`)
+  }
+
+  if (parts.length === 0) {
+    const timezoneArea = parseTimezoneArea(timezone)
+    if (timezoneArea) {
+      parts.push(`Timezone area: ${timezoneArea}`)
+    }
+  }
+
+  if (parts.length === 0) {
+    const coordinateZone = describeCoordinateZone(location?.latitude, location?.longitude)
+    if (coordinateZone) {
+      parts.push(`Coordinate zone: ${coordinateZone}`)
+    }
   }
 
   return parts.length > 0 ? parts.join(' | ') : null
@@ -86,7 +125,7 @@ function WeatherCard({ weather, location, unit = 'imperial', source }) {
     'Selected Location'
   const latitudeLabel = formatCoordinate(location?.latitude, 'N', 'S')
   const longitudeLabel = formatCoordinate(location?.longitude, 'E', 'W')
-  const areaDetails = buildAreaDetails(location)
+  const areaDetails = buildAreaDetails(location, weather?.timezone)
   const localTimeLabel = formatLocalTime(weather?.observationTime, weather?.timezone)
 
   return (
