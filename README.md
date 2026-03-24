@@ -31,6 +31,33 @@ App runs at http://localhost:5173.
 - For unresolved locations, the label shows `Location (approximate)`.
 - `Coordinates fall within` is now conditional: it only appears when a meaningful city is not available, using fallback area inference from state/country, then timezone area, then coordinate zone.
 
+## Forecast and Map Feature Notes
+
+- Results now include `Current`, `Forecast`, and `Map` views once a location is loaded.
+- Forecast and map data are lazy-loaded only when their tab is opened.
+- The map supports precipitation, temperature, and cloud-cover overlays with click/tap point inspection summaries.
+
+### No-Key External Services
+
+- Open-Meteo: current weather, forecast, and point inspection
+- OpenStreetMap: base map tiles
+- RainViewer: precipitation overlay metadata and tiles
+- NASA GIBS: temperature and cloud-cover overlay imagery
+
+No API keys, tokens, or backend proxy are required.
+
+### Client-side Diagnostics
+
+- In development and test flows, service failures emit console warnings with `weatherapp:*` diagnostic tags.
+- Diagnostics cover provider, request type, timeout/network error class, and coordinate context.
+- Diagnostics do not include secrets or credentials.
+
+### Measurement Protocol Summary
+
+- `SC-002` and `SC-003`: run at least 10 local measurements each on desktop Chrome, using tab activation as start and visible content as stop.
+- `SC-004`: run 20 happy-path request attempts; pass when at least 95% succeed.
+- `SC-008`: run a 10-user guided-less classroom/demo task; pass when at least 90% complete without verbal guidance.
+
 ## Testing
 
 ```bash

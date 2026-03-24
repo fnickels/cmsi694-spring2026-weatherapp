@@ -55,6 +55,41 @@ Open the local Vite URL shown in the terminal.
 2. Simulate or mock an overlay failure and confirm the base map remains usable with a layer-specific error.
 3. Simulate map initialization failure and confirm the fallback text summary renders.
 
+## External Service Compliance (No API Keys)
+
+- Open-Meteo forecast and point inspection requests are public and keyless.
+- OpenStreetMap base tiles are public and keyless.
+- RainViewer precipitation metadata and tiles are public and keyless.
+- NASA GIBS overlay imagery requests are public and keyless.
+- No backend proxy or API tokens are required for this feature.
+
+## Client-side Failure Diagnostics
+
+- Forecast, map, overlay, and point-inspection service failures emit diagnostic warnings in development and test environments using the `weatherapp:*` console event prefix.
+- Diagnostic payloads include provider, request type, timeout/network classification, and coordinate context.
+- Diagnostics intentionally exclude credentials and user-identifying data.
+
+## Measurement Protocol
+
+### SC-002 and SC-003 Timing Baseline
+
+- Baseline environment: desktop Chrome on a local development machine with normal broadband connectivity.
+- Forecast timing (`SC-002`): measure from forecast-tab click until daily and hourly forecast content is visible.
+- Map timing (`SC-003`): measure from map-tab click until map canvas is visible and pan/zoom controls respond.
+- Record at least 10 runs per scenario; compute median and 95th percentile.
+
+### SC-004 Manual Request Success Evaluation
+
+- Run the documented happy-path scenarios 20 times across forecast and map interactions.
+- Count each forecast load, overlay switch, and point inspection as one request attempt.
+- Pass threshold: at least 95% of attempts succeed without service-unavailability errors.
+
+### SC-008 Usability Check
+
+- Run a brief observed task with at least 10 representative users in classroom/demo context.
+- Task: open forecast, open map, switch overlay, interpret one inspected value.
+- Pass threshold: at least 90% complete without verbal guidance.
+
 ## Automated Test Commands
 
 ```bash
